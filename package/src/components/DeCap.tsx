@@ -1,7 +1,7 @@
 // DeCap main component
 import React, { useState, useEffect } from 'react';
 import { DeCapProps } from '../types';
-import { generateChallenge, getDisplayWord, validateLetterPlacement } from '../lib/challenge';
+import { generateChallenge } from '../lib/challenge';
 import './DeCap.css';
 
 export const DeCap: React.FC<DeCapProps> = ({
@@ -27,6 +27,8 @@ export const DeCap: React.FC<DeCapProps> = ({
   const [showFinalSuccess, setShowFinalSuccess] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [nextStep, setNextStep] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStartValue, setDragStartValue] = useState<number | null>(null);
 
   // Timer countdown
   useEffect(() => {
@@ -46,49 +48,62 @@ export const DeCap: React.FC<DeCapProps> = ({
     return () => clearInterval(timer);
   }, [isModalOpen, isCompleted, onFailure]);
 
+  // Global mouse/touch up listener to handle drag end outside slider
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleGlobalMouseUp = () => {
+      setIsDragging(false);
+      setDragStartValue(null);
+    };
+
+    const handleGlobalTouchEnd = () => {
+      setIsDragging(false);
+      setDragStartValue(null);
+    };
+
+    document.addEventListener('mouseup', handleGlobalMouseUp);
+    document.addEventListener('touchend', handleGlobalTouchEnd);
+
+    return () => {
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+      document.removeEventListener('touchend', handleGlobalTouchEnd);
+    };
+  }, [isDragging]);
+
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleSliderChange = (value: number) => {
-    console.log('Slider value changed:', value); // Debug log
-    setSliderValue(value);
-    
-    // Check if slider is in correct position
-    // Calculate target position to align with the empty slot in the word display
+  // Pre-calculate target position to avoid recalculating on every slider change
+  const targetPosition = React.useMemo(() => {
     const wordLength = challenge.content.targetWord.length;
     const missingIndex = challenge.content.missingLetterIndex;
-    
-    // Calculate position based on visual letter slots (accounting for gaps)
-    // Each letter slot takes up space, and we need to align with the center of the missing slot
-    const slotWidth = 48; // Letter slot width in pixels
-    const slotGap = 10; // Gap between slots in pixels
+    const slotWidth = 48;
+    const slotGap = 12;
     const totalWordWidth = (wordLength * slotWidth) + ((wordLength - 1) * slotGap);
+    const slotCenterPosition = (missingIndex * (slotWidth + slotGap)) + (slotWidth / 2);
+    return (slotCenterPosition / totalWordWidth) * 100;
+  }, [challenge.content.targetWord, challenge.content.missingLetterIndex]);
+
+  const handleSliderChange = (value: number) => {
+    // Only allow changes if user is actively dragging
+    if (!isDragging) return;
     
-    // Position of the missing slot center relative to the word
-    const slotPosition = (missingIndex * (slotWidth + slotGap)) + (slotWidth / 2);
+    setSliderValue(value);
     
-    // Convert to percentage of slider width (assuming slider matches word width)
-    const targetPosition = (slotPosition / totalWordWidth) * 100;
-    
-    const tolerance = 6; // 6% tolerance for alignment (more precise)
-    
-    console.log('Slider value:', value, 'Target position:', targetPosition, 'Missing index:', challenge.content.missingLetterIndex, 'Word length:', wordLength);
-    
+    const tolerance = 8;
     const isCurrentlyAligned = Math.abs(value - targetPosition) <= tolerance;
     
     if (isCurrentlyAligned && !isAligned) {
-      // Just became aligned - start 2-second timer
       setIsAligned(true);
       
       const timer = setTimeout(() => {
-        // After 2 seconds of being aligned, show success
         setShowSuccess(true);
         setIsCompleted(true);
         
-        // Auto-continue after showing success for 1 second
         setTimeout(() => {
           handleContinue();
         }, 1000);
@@ -96,7 +111,6 @@ export const DeCap: React.FC<DeCapProps> = ({
       
       setAlignmentTimer(timer);
     } else if (!isCurrentlyAligned && isAligned) {
-      // No longer aligned - cancel timer and reset
       setIsAligned(false);
       setShowSuccess(false);
       if (alignmentTimer) {
@@ -104,6 +118,32 @@ export const DeCap: React.FC<DeCapProps> = ({
         setAlignmentTimer(null);
       }
     }
+  };
+
+  const handleSliderMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setDragStartValue(sliderValue);
+  };
+
+  const handleSliderMouseUp = () => {
+    setIsDragging(false);
+    setDragStartValue(null);
+  };
+
+  const handleSliderTouchStart = (e: React.TouchEvent) => {
+    setIsDragging(true);
+    setDragStartValue(sliderValue);
+  };
+
+  const handleSliderTouchEnd = () => {
+    setIsDragging(false);
+    setDragStartValue(null);
+  };
+
+  const handleSliderClick = (e: React.MouseEvent) => {
+    // Prevent click events from changing slider value
+    e.preventDefault();
+    e.stopPropagation();
   };
 
   const handleContinue = () => {
@@ -166,7 +206,7 @@ export const DeCap: React.FC<DeCapProps> = ({
       setTimeout(() => {
         setIsTransitioning(false);
       }, 50);
-    }, 300); // Match CSS transition duration
+    }, 200); // Match CSS transition duration
   };
 
   const handleWalletSign = async () => {
@@ -214,6 +254,8 @@ export const DeCap: React.FC<DeCapProps> = ({
     setShowFinalSuccess(false);
     setIsTransitioning(false);
     setNextStep(null);
+    setIsDragging(false);
+    setDragStartValue(null);
     if (alignmentTimer) {
       clearTimeout(alignmentTimer);
       setAlignmentTimer(null);
@@ -225,7 +267,6 @@ export const DeCap: React.FC<DeCapProps> = ({
     onFailure();
   };
 
-  const displayWord = getDisplayWord(challenge);
   const totalSteps = mode === 'simple' ? 2 : 3;
 
   return (
@@ -294,13 +335,17 @@ export const DeCap: React.FC<DeCapProps> = ({
                 {/* Custom Slider with Letter Thumb - Hide when completed */}
                 {!showSuccess && (
                   <div className="decap-slider-container">
-                    <div className="decap-slider-track">
+                    <div 
+                      className="decap-slider-track"
+                      style={{
+                        width: `${(challenge.content.targetWord.length * 48) + ((challenge.content.targetWord.length - 1) * 12)}px`
+                      }}
+                    >
                       {/* Letter above slider */}
                       <div 
                         className="decap-slider-thumb"
                         style={{ 
-                          left: `calc(${sliderValue}% - 28px)`,
-                          transition: isAligned ? 'left 0.1s ease-out' : 'left 0.05s ease-out'
+                          left: `calc(${sliderValue}% - 28px)`
                         }}
                       >
                         <div className="decap-letter-tile">
@@ -312,8 +357,7 @@ export const DeCap: React.FC<DeCapProps> = ({
                       <div 
                         className="decap-slider-circle"
                         style={{ 
-                          left: `calc(${sliderValue}% - 10px)`,
-                          transition: isAligned ? 'left 0.1s ease-out' : 'left 0.05s ease-out'
+                          left: `calc(${sliderValue}% - 10px)`
                         }}
                       />
                       
@@ -321,8 +365,14 @@ export const DeCap: React.FC<DeCapProps> = ({
                         type="range"
                         min="0"
                         max="100"
+                        step="0.1"
                         value={sliderValue}
                         onChange={(e) => handleSliderChange(Number(e.target.value))}
+                        onMouseDown={handleSliderMouseDown}
+                        onMouseUp={handleSliderMouseUp}
+                        onTouchStart={handleSliderTouchStart}
+                        onTouchEnd={handleSliderTouchEnd}
+                        onClick={handleSliderClick}
                         className="decap-slider-input"
                       />
                     </div>
@@ -381,21 +431,6 @@ export const DeCap: React.FC<DeCapProps> = ({
 
             {((currentStep === 2 && mode === 'simple') || currentStep === 3) && (
               <div className="decap-success-final">
-                <div className="decap-confetti-container">
-                  {/* Confetti particles */}
-                  {Array.from({ length: 50 }, (_, i) => (
-                    <div 
-                      key={i} 
-                      className="decap-confetti-particle"
-                      style={{
-                        left: `${Math.random() * 100}%`,
-                        animationDelay: `${Math.random() * 3}s`,
-                        backgroundColor: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'][Math.floor(Math.random() * 5)]
-                      }}
-                    />
-                  ))}
-                </div>
-
                 <div className="decap-success-icon">
                   <div className="decap-checkmark">✓</div>
                 </div>
