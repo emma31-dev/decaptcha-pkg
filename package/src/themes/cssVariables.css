@@ -1,0 +1,92 @@
+/**
+ * CSS Custom Properties for DeCap Theme System
+ * 
+ * These variables are dynamically injected by the ThemeProvider
+ * and can be used throughout the component styles.
+ */
+
+:root {
+  /* Colors */
+  --decap-color-primary: #007AFF;
+  --decap-color-secondary: #5856D6;
+  --decap-color-background: #FFFFFF;
+  --decap-color-surface: #F2F2F7;
+  --decap-color-text: #000000;
+  --decap-color-text-secondary: #8E8E93;
+  --decap-color-success: #34C759;
+  --decap-color-error: #FF3B30;
+  --decap-color-warning: #FF9500;
+  
+  /* Spacing */
+  --decap-spacing-xs: 4px;
+  --decap-spacing-sm: 8px;
+  --decap-spacing-md: 16px;
+  --decap-spacing-lg: 24px;
+  --decap-spacing-xl: 32px;
+  
+  /* Border Radius */
+  --decap-border-radius-sm: 6px;
+  --decap-border-radius-md: 12px;
+  --decap-border-radius-lg: 16px;
+  
+  /* Shadows */
+  --decap-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --decap-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --decap-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  
+  /* Component-specific variables */
+  --decap-modal-background: rgba(255, 255, 255, 0.95);
+  --decap-modal-border: rgba(255, 255, 255, 0.2);
+  --decap-overlay-background: rgba(0, 0, 0, 0.5);
+  --decap-button-primary: #333;
+  --decap-button-secondary: #999;
+  --decap-input-background: #f5f5f5;
+  --decap-input-border: #e0e0e0;
+}
+
+/* Dark theme overrides */
+[data-theme="dark"] {
+  --decap-color-background: #000000;
+  --decap-color-surface: #1C1C1E;
+  --decap-color-text: #FFFFFF;
+  --decap-color-text-secondary: #8E8E93;
+  
+  --decap-modal-background: rgba(28, 28, 30, 0.95);
+  --decap-modal-border: rgba(255, 255, 255, 0.1);
+  --decap-overlay-background: rgba(0, 0, 0, 0.7);
+  --decap-input-background: rgba(255, 255, 255, 0.1);
+  --decap-input-border: rgba(255, 255, 255, 0.2);
+}
+
+/* Utility classes for theme-aware styling */
+.decap-theme-text {
+  color: var(--decap-color-text);
+}
+
+.decap-theme-text-secondary {
+  color: var(--decap-color-text-secondary);
+}
+
+.decap-theme-background {
+  background-color: var(--decap-color-background);
+}
+
+.decap-theme-surface {
+  background-color: var(--decap-color-surface);
+}
+
+.decap-theme-primary {
+  color: var(--decap-color-primary);
+}
+
+.decap-theme-success {
+  color: var(--decap-color-success);
+}
+
+.decap-theme-error {
+  color: var(--decap-color-error);
+}
+
+.decap-theme-warning {
+  color: var(--decap-color-warning);
+}

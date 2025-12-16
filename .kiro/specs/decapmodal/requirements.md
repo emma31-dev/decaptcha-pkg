@@ -61,3 +61,15 @@ The DecapModal is a React component that provides a decentralized captcha verifi
 3. WHEN an error occurs, THE DecapModal SHALL display appropriate error messages
 4. THE DecapModal SHALL use consistent visual styling throughout all steps
 5. THE DecapModal SHALL be responsive and work on both desktop and mobile devices
+
+### Requirement 5
+
+**User Story:** As a developer, I want to integrate Orange Protocol reputation scoring with a mock API, so that I can test reputation-based verification flows without relying on external services.
+
+#### Acceptance Criteria
+
+1. THE DecapModal SHALL implement a mock Orange Protocol API that accepts user social network and proof-of-humanity data
+2. WHEN the mock API receives a request, THE DecapModal SHALL validate the input against the Orange Protocol JSON schema
+3. THE DecapModal SHALL generate random reputation scores between 0-100 for testing purposes
+4. THE DecapModal SHALL return reputation data in the specified Orange Protocol output format
+5. THE DecapModal SHALL handle API failures gracefully and provide fallback scoring mechanisms

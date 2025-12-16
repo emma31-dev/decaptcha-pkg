@@ -378,10 +378,81 @@ interface DragDropHandlers {
 The auto mode leverages onchain reputation to adjust CAPTCHA difficulty or bypass verification entirely:
 
 #### Reputation Score Sources
-- **Orange Protocol**: Onchain reputation graph
+- **Orange Protocol**: Mock API implementation with JSON schema validation
 - **Gitcoin Passport**: REST API for identity verification
 - **Manual Scoring**: Wallet activity (tx count, age, balance) as fallback
 - **Lens Protocol**: Social graph reputation via contracts
+
+#### Orange Protocol Mock API Schema
+
+**Input Schema:**
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "result": {
+      "type": "object",
+      "properties": {
+        "snsInfos": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "snsType": {
+                "type": "string",
+                "enum": ["Discord", "Google", "Telegram", "Twitter"]
+              },
+              "snsId": {
+                "type": "string"
+              },
+              "userName": {
+                "type": "string"
+              },
+              "joinedTime": {
+                "type": "integer",
+                "description": "Unix timestamp of when the user joined the platform"
+              },
+              "followerCount": {
+                "type": "integer"
+              },
+              "TweetsCount": {
+                "type": "integer"
+              }
+            },
+            "required": ["snsType", "snsId", "userName"],
+            "additionalProperties": false
+          }
+        },
+        "pohInfos": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "pohType": {
+                "type": "string"
+              }
+            },
+            "required": ["pohType"]
+          }
+        },
+        "ensInfos": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9]+\\.eth$"
+          }
+        }
+      },
+      "required": ["snsInfos", "pohInfos", "ensInfos"]
+    }
+  },
+  "required": ["result"]
+}
+```
+
+**Output Schema:**
+The mock API returns the same structure as input but with calculated reputation scores based on the provided social network and proof-of-humanity data.
 
 #### Implementation Logic
 ```typescript
@@ -389,6 +460,12 @@ interface ReputationSystem {
   fetchWalletReputation: (address: string) => Promise<number>;
   normalizeScore: (rawScore: any) => number; // Scale to 0-100
   adjustCaptchaLogic: (score: number) => CaptchaMode;
+}
+
+interface OrangeProtocolAPI {
+  fetchReputationScore: (input: OrangeProtocolInput) => Promise<OrangeProtocolOutput>;
+  validateSchema: (data: any) => boolean;
+  generateMockScore: (input: OrangeProtocolInput) => number;
 }
 
 interface ReputationConfig {
@@ -402,6 +479,34 @@ interface ReputationSource {
   weight: number;
   apiUrl?: string;
   contractAddress?: string;
+}
+
+interface OrangeProtocolInput {
+  result: {
+    snsInfos: Array<{
+      snsType: 'Discord' | 'Google' | 'Telegram' | 'Twitter';
+      snsId: string;
+      userName: string;
+      joinedTime?: number;
+      followerCount?: number;
+      TweetsCount?: number;
+    }>;
+    pohInfos: Array<{
+      pohType: string;
+    }>;
+    ensInfos: string[]; // Array of ENS names matching pattern ^[a-zA-Z0-9]+\.eth$
+  };
+}
+
+interface OrangeProtocolOutput extends OrangeProtocolInput {
+  // Same structure as input, but processed by mock API
+  // Mock API will generate random reputation score based on input data
+}
+
+interface OrangeProtocolMockAPI {
+  validateInput: (data: any) => boolean;
+  generateMockScore: (input: OrangeProtocolInput) => number;
+  processRequest: (input: OrangeProtocolInput) => Promise<OrangeProtocolOutput>;
 }
 
 // Example implementation
@@ -461,11 +566,20 @@ function determineCaptchaMode(score: number): CaptchaMode {
 │   └── useWalletReputation.js
 ├── /utils
 │   ├── verifySignature.js
-│   └── fetchOrangeScore.js
+│   ├── fetchOrangeScore.js
+│   └── orangeProtocol.ts (mock implementation, easily replaceable with real API)
 ├── /config
 │   └── decap.config.js (optional)
 └── index.js
 ```
+
+### Orange Protocol Implementation Strategy
+
+The Orange Protocol integration is implemented in a separate `orangeProtocol.ts` file to enable easy transition from mock to real API:
+
+- **Mock Phase**: `orangeProtocol.ts` contains mock API implementation with schema validation
+- **Production Phase**: Replace `orangeProtocol.ts` with real Orange Protocol API calls
+- **Interface Consistency**: Same TypeScript interfaces used for both mock and real implementations
 
 ## Usage Example
 

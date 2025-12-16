@@ -7,6 +7,8 @@ export interface DeCapProps {
   onFailure: () => void;
   className?: string;
   children: React.ReactNode;
+  theme?: 'light' | 'dark' | 'auto';
+  useTheme?: () => 'light' | 'dark'; // Hook from dapp for auto theme detection
 }
 
 export interface WalletConnection {
@@ -26,7 +28,6 @@ export interface VerificationProof {
 }
 
 export interface DeCapConfig {
-  gasPayer?: GasPayerConfig;
   mode?: 'simple' | 'advanced' | 'auto';
   theme?: 'light' | 'dark';
   customChallenges?: boolean;
@@ -34,15 +35,6 @@ export interface DeCapConfig {
     bypass: number; // Default: 70
     easy: number;   // Default: 50
   };
-}
-
-export interface GasPayerConfig {
-  walletAddress: string;
-  privateKey?: string;
-  rpcUrl: string;
-  chainId: number;
-  gasLimit?: number;
-  maxFeePerGas?: string;
 }
 
 export interface ChallengeData {
@@ -93,4 +85,32 @@ export interface ReputationSourceResult {
   weight: number;
   success: boolean;
   error?: string;
+}
+
+// Orange Protocol specific types
+export interface OrangeProtocolInput {
+  result: {
+    snsInfos: Array<{
+      snsType: 'Discord' | 'Google' | 'Telegram' | 'Twitter';
+      snsId: string;
+      userName: string;
+      joinedTime?: number;
+      followerCount?: number;
+      TweetsCount?: number;
+    }>;
+    pohInfos: Array<{
+      pohType: string;
+    }>;
+    ensInfos: string[]; // Array of ENS names matching pattern ^[a-zA-Z0-9]+\.eth$
+  };
+}
+
+export interface OrangeProtocolOutput extends OrangeProtocolInput {
+  reputationScore?: number;
+}
+
+export interface OrangeProtocolAPI {
+  validateInput: (data: any) => boolean;
+  generateMockScore: (input: OrangeProtocolInput) => number;
+  processRequest: (input: OrangeProtocolInput) => Promise<OrangeProtocolOutput>;
 }

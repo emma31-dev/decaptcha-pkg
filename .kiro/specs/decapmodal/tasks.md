@@ -9,25 +9,42 @@
   - _Requirements: 3.1, 3.4_
 
 - [ ] 2. Implement utility functions
-- [ ] 2.1 Create signature verification utilities
+- [x] 2.1 Create signature verification utilities
+
+
+
   - Implement /utils/verifySignature.js with ethers.js wallet message signing functions
   - Add SIWE-style signature validation and verification logic
   - Implement secure message generation for wallet signing using ethers utils
   - _Requirements: 2.3, 2.4_
 
-- [ ] 2.2 Implement Orange Protocol reputation fetching
-  - Create /utils/fetchOrangeScore.js for Orange Protocol onchain reputation integration
-  - Add ethers.js contract integration for Orange Protocol reputation graph
-  - Implement score normalization from Orange Protocol to 0-100 scale
-  - Add error handling and fallback logic for Orange Protocol API failures
-  - _Requirements: 4.4, 3.2_
+- [x] 2.2 Implement Orange Protocol mock API in separate module
 
-- [ ] 2.3 Create additional reputation source integrations
+
+
+  - Create /utils/orangeProtocol.ts with mock Orange Protocol API implementation
+  - Add JSON schema validation for Orange Protocol input/output format according to provided schemas
+  - Implement mock API that generates random reputation scores (0-100) based on input data
+  - Create score calculation logic based on social network data (follower count, account age, ENS domains)
+  - Add proper TypeScript interfaces for Orange Protocol data structures
+  - Design module for easy replacement with real Orange Protocol API later
+  - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
+
+
+- [ ] 2.3 Update fetchOrangeScore.js to use orangeProtocol module
+  - Modify /utils/fetchOrangeScore.js to import and use orangeProtocol.ts
+  - Add error handling and fallback logic for API failures
+  - Implement integration with existing reputation system
+  - _Requirements: 5.1, 5.5_
+
+- [ ] 2.4 Create additional reputation source integrations
   - Add Gitcoin Passport REST API integration in fetchOrangeScore.js
   - Implement Lens Protocol contract integration via ethers.js
   - Create manual scoring fallback using wallet activity (tx count, age, balance)
   - Add reputation source weighting and aggregation logic
   - _Requirements: 4.4, 3.2_
+
+
 
 - [ ] 3. Create React hooks
 - [ ] 3.1 Implement useCaptchaLogic hook
@@ -36,6 +53,9 @@
   - Implement step navigation and progress tracking
   - Add drag-and-drop state management for letter tiles
   - Create letter placement and verification handlers
+
+
+
   - Integrate wallet signing functionality with ethers.js
   - _Requirements: 1.1, 1.4, 2.1, 2.2, 2.3, 2.4_
 
@@ -110,6 +130,8 @@
   - Create responsive design with mobile-first approach
   - _Requirements: 4.1, 4.5_
 
+
+
 - [ ] 5.2 Implement animation system
   - Create CSS animations for drag-and-drop feedback
   - Add transition effects for step changes
@@ -139,6 +161,9 @@
 
 - [ ] 6.3 Create gas payment configuration system with Ethers.js
   - Create /config/decap.config.js template for ethers.js gas payer wallet configuration
+
+
+
   - Add gasWallet configuration option in decap.config.js (Option A)
   - Add gasWallet prop support directly to DeCap component (Option B)
   - Implement configuration loader with ethers provider setup

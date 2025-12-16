@@ -5,6 +5,8 @@
   left: 0;
   right: 0;
   bottom: 0;
+  width: 100vw;
+  height: 100vh;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -13,6 +15,7 @@
   justify-content: center;
   z-index: 10000;
   animation: decap-overlay-enter 0.2s ease-out;
+  overflow: hidden;
 }
 
 @keyframes decap-overlay-enter {
@@ -29,19 +32,26 @@
 }
 
 .decap-modal {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--decap-background, rgba(255, 255, 255, 0.95));
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--decap-border, rgba(255, 255, 255, 0.2));
   border-radius: 20px;
   padding: 28px;
   width: 440px;
   max-width: 90vw;
+  min-height: 500px;
+  max-height: 80vh;
   box-shadow: 
     0 32px 64px rgba(0, 0, 0, 0.2),
-    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    0 0 0 1px var(--decap-border-light, rgba(255, 255, 255, 0.1)) inset;
   position: relative;
   animation: decap-modal-enter 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  
+  /* Vertical centering for content */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   
   /* Disable text selection throughout the modal */
   -webkit-user-select: none;
@@ -65,27 +75,65 @@
   }
 }
 
+/* Mobile Drawer Handle */
+.decap-drawer-handle {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .decap-drawer-handle {
+    display: block;
+    width: 40px;
+    height: 4px;
+    background: var(--decap-text-secondary, rgba(0, 0, 0, 0.2));
+    border-radius: 2px;
+    margin: 0 auto 16px;
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
 /* Header */
 .decap-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  position: absolute;
+  top: 16px;
+  left: 28px;
+  right: 28px;
+  z-index: 10;
+}
+
+@media (max-width: 600px) {
+  .decap-modal-header {
+    top: 20px;
+    left: 20px;
+    right: 20px;
+  }
 }
 
 .decap-close-btn {
   background: none;
   border: none;
-  font-size: 20px;
-  color: #666;
+  font-size: 28px;
+  color: var(--decap-text-secondary, #666);
   cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
+  padding: 8px;
+  border-radius: 8px;
   transition: background-color 0.2s;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .decap-close-btn:hover {
-  background-color: #f0f0f0;
+  background-color: var(--decap-surface, #f0f0f0);
 }
 
 .decap-progress-bars {
@@ -97,12 +145,12 @@
   width: 32px;
   height: 6px;
   border-radius: 3px;
-  background-color: #e0e0e0;
+  background-color: var(--decap-border, #e0e0e0);
   transition: background-color 0.3s ease-out, transform 0.2s ease-out;
 }
 
 .decap-progress-bar.active {
-  background-color: #333;
+  background-color: var(--decap-text, #333);
   transform: scaleY(1.3);
 }
 
@@ -113,25 +161,38 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 20px;
+  position: absolute;
+  top: 60px;
+  left: 28px;
+  right: 28px;
+  z-index: 10;
+}
+
+@media (max-width: 600px) {
+  .decap-title-section {
+    top: 70px;
+    left: 20px;
+    right: 20px;
+  }
 }
 
 /* Title */
 .decap-title {
   font-size: 22px;
   font-weight: 600;
-  color: #333;
+  color: var(--decap-text, #333);
   text-align: center;
   margin: 0;
 }
 
 /* Timer */
 .decap-timer {
-  background: #f5f5f5;
+  background: var(--decap-surface, #f5f5f5);
   padding: 6px 12px;
   border-radius: 16px;
   font-size: 16px;
   font-weight: 600;
-  color: #666;
+  color: var(--decap-text-secondary, #666);
   align-self: flex-end;
 }
 
@@ -153,25 +214,25 @@
 .decap-letter-slot {
   width: 48px;
   height: 48px;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--decap-border, #e0e0e0);
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 24px;
   font-weight: 600;
-  color: #333;
-  background: white;
+  color: var(--decap-text, #333);
+  background: var(--decap-background, white);
 }
 
 .decap-letter-slot.missing {
-  border: 2px dashed #ccc;
-  background: #f9f9f9;
+  border: 2px dashed var(--decap-border-light, #ccc);
+  background: var(--decap-surface, #f9f9f9);
 }
 
 .decap-letter-slot.filled {
-  border: 2px solid #4CAF50;
-  background: #4CAF50;
+  border: 2px solid var(--decap-success, #4CAF50);
+  background: var(--decap-success, #4CAF50);
   color: white;
   animation: decap-success-fill 0.2s ease-out;
 }
@@ -189,20 +250,20 @@
 
 /* Letter Tile */
 .decap-letter-tile {
-  width: 56px;
-  height: 56px;
-  background: linear-gradient(135deg, #333 0%, #555 100%);
-  color: white;
-  border-radius: 14px;
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, var(--decap-text, #333) 0%, var(--decap-text-secondary, #555) 100%);
+  color: var(--decap-background, white);
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 600;
   cursor: grab;
   box-shadow: 
     0 4px 12px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    0 0 0 1px var(--decap-border-light, rgba(255, 255, 255, 0.1)) inset;
   position: relative;
   z-index: 2;
 }
@@ -233,7 +294,7 @@
 
 .decap-slider-track {
   height: 8px;
-  background: linear-gradient(90deg, #f0f0f0 0%, #e0e0e0 100%);
+  background: linear-gradient(90deg, var(--decap-surface, #f0f0f0) 0%, var(--decap-border, #e0e0e0) 100%);
   border-radius: 4px;
   position: relative;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) inset;
@@ -245,8 +306,7 @@
   top: -80px; /* Position letter much higher above track */
   z-index: 3;
   /* Optimize for fast rendering */
-  transform: translateZ(0); /* Force hardware acceleration */
-  will-change: left;
+  will-change: left, transform;
 }
 
 .decap-slider-thumb .decap-letter-tile {
@@ -265,16 +325,15 @@
   top: -6px; /* Center on 8px track */
   width: 20px;
   height: 20px;
-  background: linear-gradient(135deg, #333 0%, #555 100%);
+  background: linear-gradient(135deg, var(--decap-text, #333) 0%, var(--decap-text-secondary, #555) 100%);
   border-radius: 50%;
   box-shadow: 
     0 2px 6px rgba(0, 0, 0, 0.2),
-    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    0 0 0 1px var(--decap-border-light, rgba(255, 255, 255, 0.1)) inset;
   z-index: 2; /* Above track, below input */
   pointer-events: none; /* Make it non-interactive */
   user-select: none; /* Prevent selection */
   /* Optimize for fast rendering */
-  transform-origin: center;
   will-change: left, transform;
 }
 
@@ -331,7 +390,7 @@
 
 .decap-slider-instruction {
   font-size: 16px;
-  color: #666;
+  color: var(--decap-text-secondary, #666);
   text-align: center;
   font-weight: 500;
 }
@@ -340,8 +399,8 @@
 .decap-continue-btn {
   width: 100%;
   padding: 16px 32px;
-  background: #999;
-  color: white;
+  background: var(--decap-text-secondary, #999);
+  color: var(--decap-background, white);
   border: none;
   border-radius: 12px;
   font-size: 18px;
@@ -355,7 +414,7 @@
 }
 
 .decap-continue-btn:hover {
-  background: #777;
+  background: var(--decap-text-muted, #777);
 }
 
 .decap-continue-btn:active {
@@ -363,21 +422,21 @@
 }
 
 .decap-continue-btn.enabled {
-  background: #333;
+  background: var(--decap-text, #333);
 }
 
 .decap-continue-btn.enabled:hover {
-  background: #555;
+  background: var(--decap-text-secondary, #555);
 }
 
 .decap-continue-btn:disabled {
-  background: #999;
+  background: var(--decap-text-secondary, #999);
   cursor: not-allowed;
 }
 
 /* Success Messages */
 .decap-success-message {
-  color: #4CAF50;
+  color: var(--decap-success, #4CAF50);
   font-size: 18px;
   font-weight: 600;
   text-align: center;
@@ -407,18 +466,18 @@
 .decap-wallet-title {
   font-size: 22px;
   font-weight: 600;
-  color: #333;
+  color: var(--decap-text, #333);
   margin: 0;
   text-align: center;
 }
 
 .decap-wallet-description {
-  background: #e8e8e8;
-  border: 2px solid #333;
+  background: var(--decap-surface, #e8e8e8);
+  border: 2px solid var(--decap-text, #333);
   padding: 20px;
   border-radius: 12px;
   font-size: 16px;
-  color: #666;
+  color: var(--decap-text-secondary, #666);
   text-align: center;
   line-height: 1.5;
   max-width: 360px;
@@ -426,8 +485,8 @@
 
 .decap-sign-btn {
   padding: 16px 32px;
-  background: #007AFF;
-  color: white;
+  background: var(--decap-primary, #007AFF);
+  color: var(--decap-background, white);
   border: none;
   border-radius: 12px;
   font-size: 18px;
@@ -438,48 +497,66 @@
 }
 
 .decap-sign-btn:hover:not(:disabled) {
-  background: #0056CC;
+  background: var(--decap-primary-dark, #0056CC);
 }
 
 .decap-sign-btn:disabled {
-  background: #999;
+  background: var(--decap-text-secondary, #999);
   cursor: not-allowed;
 }
 
-/* Final Success Page */
+/* Optimized Final Success Page */
 .decap-success-final {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 32px;
-  padding: 60px 24px;
+  justify-content: center;
+  padding: 40px 24px;
   text-align: center;
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(135deg, 
-    rgba(76, 175, 80, 0.05) 0%, 
-    rgba(139, 195, 74, 0.05) 100%
-  );
-  border-radius: 16px;
-  margin: -12px;
+  min-height: 200px;
 }
 
+.decap-success-popup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  animation: decap-popup-enter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
 
+@keyframes decap-popup-enter {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
 
-.decap-success-icon {
-  width: 90px;
-  height: 90px;
-  background: linear-gradient(135deg, #E8E8E8 0%, #F5F5F5 100%);
+/* Simple Big Checkmark */
+.decap-success-icon-simple {
+  width: 120px;
+  height: 120px;
+  background: var(--decap-success, #4CAF50);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: decap-success-bounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  position: relative;
-  z-index: 1;
+  margin: 0 auto;
+  animation: decap-success-bounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   box-shadow: 
-    0 8px 24px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+    0 8px 24px rgba(76, 175, 80, 0.3),
+    0 0 0 1px var(--decap-border-light, rgba(255, 255, 255, 0.1)) inset;
+}
+
+.decap-checkmark-simple {
+  font-size: 48px;
+  color: var(--decap-background, white);
+  font-weight: bold;
+  line-height: 1;
+  animation: decap-checkmark-pop 0.3s ease-out 0.3s both;
 }
 
 @keyframes decap-success-bounce {
@@ -496,14 +573,7 @@
   }
 }
 
-.decap-checkmark {
-  font-size: 32px;
-  color: #666;
-  font-weight: bold;
-  animation: decap-checkmark-draw 0.8s ease-out 0.3s both;
-}
-
-@keyframes decap-checkmark-draw {
+@keyframes decap-checkmark-pop {
   0% {
     transform: scale(0) rotate(-45deg);
     opacity: 0;
@@ -514,23 +584,39 @@
   }
 }
 
-.decap-success-title {
-  font-size: 26px;
-  font-weight: 600;
-  color: #333;
-  margin: 0;
-  animation: decap-text-appear 0.6s ease-out 0.6s both;
-  position: relative;
-  z-index: 1;
+/* Success Content */
+.decap-success-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
 
-.decap-success-final .decap-success-message {
-  font-size: 18px;
-  color: #666;
+.decap-success-title-optimized {
+  font-size: 24px;
+  font-weight: 600;
   margin: 0;
-  animation: decap-text-appear 0.6s ease-out 0.8s both;
-  position: relative;
-  z-index: 1;
+  color: var(--decap-text, #333);
+  animation: decap-text-slide-up 0.4s ease-out 1.2s both;
+}
+
+.decap-success-subtitle {
+  font-size: 16px;
+  margin: 0;
+  color: var(--decap-text-secondary, #666);
+  opacity: 0.7;
+  animation: decap-text-slide-up 0.4s ease-out 1.4s both;
+}
+
+@keyframes decap-text-slide-up {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes decap-text-appear {
@@ -617,11 +703,30 @@
 
 
 
-/* Responsive */
-@media (max-width: 480px) {
+/* Mobile Drawer Styling */
+@media (max-width: 600px) {
+  .decap-modal-overlay {
+    align-items: flex-end;
+    justify-content: center;
+  }
+  
   .decap-modal {
-    width: 350px;
-    padding: 20px;
+    width: 100%;
+    max-width: 100%;
+    min-height: 75vh;
+    max-height: 75vh;
+    margin: 0;
+    border-radius: 24px 24px 0 0;
+    padding: 24px 20px 20px;
+    animation: decap-modal-slide-up 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+  
+  .decap-modal.closing {
+    animation: decap-modal-slide-down 0.3s ease-out forwards;
   }
   
   .decap-word-display {
@@ -635,9 +740,18 @@
   }
   
   .decap-letter-tile {
-    width: 42px;
-    height: 42px;
-    font-size: 18px;
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+  
+  .decap-success-icon-simple {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .decap-checkmark-simple {
+    font-size: 40px;
   }
 }
 
@@ -650,4 +764,137 @@
 
 .decap-shake {
   animation: decap-shake 0.5s ease-in-out;
+}
+/* Theme Support - Now handled via CSS custom properties */
+
+/* Performance Optimizations */
+.decap-success-popup,
+.decap-checkmark-svg,
+.decap-success-content {
+  will-change: transform, opacity;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .decap-success-popup {
+    animation: none;
+  }
+  
+  .decap-checkmark-svg,
+  .decap-checkmark-circle,
+  .decap-checkmark-check {
+    animation: none;
+  }
+  
+  .decap-success-title-optimized,
+  .decap-success-subtitle {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Hardware acceleration for smooth animations */
+.decap-success-popup,
+.decap-checkmark-svg {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+/* Modal
+ Closing Animations */
+.decap-modal-overlay.closing {
+  animation: decap-overlay-exit 0.3s ease-out forwards;
+}
+
+.decap-modal.closing {
+  animation: decap-modal-exit 0.3s ease-out forwards;
+}
+
+@keyframes decap-modal-exit {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.85) translateY(-20px);
+  }
+}
+
+@keyframes decap-overlay-exit {
+  from {
+    opacity: 1;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  to {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+  }
+}
+
+/* Mobile Drawer Animations */
+@keyframes decap-modal-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes decap-modal-slide-down {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}/*
+ Modal Content Wrapper */
+.decap-modal-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: 120px;
+  padding-bottom: 40px;
+}
+
+@media (max-width: 600px) {
+  .decap-modal-content {
+    padding-top: 140px;
+    padding-bottom: 40px;
+  }
+}/* Mobile
+ Scroll Prevention */
+@media (max-width: 600px) {
+  .decap-modal-overlay {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh; /* Dynamic viewport height for mobile browsers */
+    overflow: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .decap-modal {
+    max-width: 100vw;
+    overflow: hidden;
+    /* Ensure modal doesn't exceed viewport */
+    box-sizing: border-box;
+  }
+}
+
+/* Prevent body scroll when modal is open */
+body.decap-modal-open {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+  height: 100% !important;
 }

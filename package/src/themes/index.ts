@@ -73,4 +73,43 @@ export const darkTheme: Theme = {
   },
 };
 
-// TODO: Implement full theme system in task 5.3
+/**
+ * Get theme based on preference and system detection
+ */
+export function getTheme(
+  preference: 'light' | 'dark' | 'auto',
+  useTheme?: () => 'light' | 'dark'
+): Theme {
+  if (preference === 'auto' && useTheme) {
+    return useTheme() === 'dark' ? darkTheme : lightTheme;
+  }
+  return preference === 'dark' ? darkTheme : lightTheme;
+}
+
+/**
+ * Generate CSS custom properties from theme
+ */
+export function generateThemeCSS(theme: Theme): string {
+  return `
+    --decap-color-primary: ${theme.colors.primary};
+    --decap-color-secondary: ${theme.colors.secondary};
+    --decap-color-background: ${theme.colors.background};
+    --decap-color-surface: ${theme.colors.surface};
+    --decap-color-text: ${theme.colors.text};
+    --decap-color-text-secondary: ${theme.colors.textSecondary};
+    --decap-color-success: ${theme.colors.success};
+    --decap-color-error: ${theme.colors.error};
+    --decap-color-warning: ${theme.colors.warning};
+    --decap-spacing-xs: ${theme.spacing.xs};
+    --decap-spacing-sm: ${theme.spacing.sm};
+    --decap-spacing-md: ${theme.spacing.md};
+    --decap-spacing-lg: ${theme.spacing.lg};
+    --decap-spacing-xl: ${theme.spacing.xl};
+    --decap-border-radius-sm: ${theme.borderRadius.sm};
+    --decap-border-radius-md: ${theme.borderRadius.md};
+    --decap-border-radius-lg: ${theme.borderRadius.lg};
+    --decap-shadow-sm: ${theme.shadows.sm};
+    --decap-shadow-md: ${theme.shadows.md};
+    --decap-shadow-lg: ${theme.shadows.lg};
+  `;
+}

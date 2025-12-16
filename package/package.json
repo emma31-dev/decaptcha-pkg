@@ -10,7 +10,18 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
-    }
+    },
+    "./themes": {
+      "import": "./dist/themes/index.mjs",
+      "require": "./dist/themes/index.js",
+      "types": "./dist/themes/index.d.ts"
+    },
+    "./utils": {
+      "import": "./dist/utils/index.mjs",
+      "require": "./dist/utils/index.js",
+      "types": "./dist/utils/index.d.ts"
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist",
@@ -18,12 +29,20 @@
   ],
   "scripts": {
     "build": "tsup",
+    "build:watch": "tsup --watch",
     "dev": "tsup --watch",
     "dev:test": "vite",
     "test": "vitest",
     "test:run": "vitest --run",
+    "test:coverage": "vitest --coverage",
     "lint": "eslint src --ext .ts,.tsx",
-    "type-check": "tsc --noEmit"
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "type-check": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "prepublishOnly": "pnpm run clean && pnpm run build && pnpm run build:check",
+    "build:check": "node scripts/build-check.js",
+    "size": "size-limit",
+    "analyze": "pnpm run build && bundlesize"
   },
   "keywords": [
     "captcha",
@@ -36,30 +55,52 @@
   "author": "DeCap Team",
   "license": "MIT",
   "peerDependencies": {
+    "ethers": "^6.0.0",
     "react": ">=16.8.0",
-    "react-dom": ">=16.8.0",
-    "ethers": "^6.0.0"
+    "react-dom": ">=16.8.0"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.0.0",
+    "@testing-library/react": "^13.4.0",
+    "@types/node": "^20.0.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
-    "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "@vitejs/plugin-react": "^4.0.0",
     "eslint": "^8.0.0",
     "eslint-plugin-react": "^7.32.0",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "jsdom": "^27.3.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "tsup": "^7.0.0",
     "typescript": "^5.0.0",
-    "vitest": "^0.34.0",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/jest-dom": "^6.0.0",
     "vite": "^4.4.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "vitest": "^0.34.0"
   },
   "dependencies": {
     "clsx": "^2.0.0"
-  }
+  },
+  "size-limit": [
+    {
+      "path": "dist/index.js",
+      "limit": "20 KB",
+      "gzip": true
+    },
+    {
+      "path": "dist/index.mjs",
+      "limit": "18 KB",
+      "gzip": true
+    }
+  ],
+  "bundlesize": [
+    {
+      "path": "./dist/*.js",
+      "maxSize": "25 KB"
+    }
+  ],
+  "sideEffects": [
+    "*.css"
+  ]
 }

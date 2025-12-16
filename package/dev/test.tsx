@@ -1,6 +1,7 @@
-import React from 'react';
+import { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { DeCap } from '../src/components/DeCap';
+import { ThemeProvider } from '../src/themes/ThemeProvider';
 import { WalletConnection, VerificationProof } from '../src/types';
 
 // Mock wallet for testing
@@ -46,35 +47,160 @@ const handleFailure = () => {
   }, true);
 };
 
-// Simple Mode Test
-const SimpleTest = () => (
-  <DeCap
-    mode="simple"
-    userWallet={mockWallet}
-    onSuccess={handleSuccess}
-    onFailure={handleFailure}
-    className="test-button"
-  >
-    Test Simple Mode (Puzzle Only)
-  </DeCap>
+// Theme Selector Component
+const ThemeSelector = ({ currentTheme, onThemeChange }: { 
+  currentTheme: 'light' | 'dark' | 'auto', 
+  onThemeChange: (theme: 'light' | 'dark' | 'auto') => void 
+}) => (
+  <div style={{ 
+    marginBottom: '20px', 
+    padding: '15px', 
+    border: '1px solid var(--decap-border, #e1e5e9)', 
+    borderRadius: '8px',
+    background: 'var(--decap-surface, #f8f9fa)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '10px',
+    flexWrap: 'wrap'
+  }}>
+    <label htmlFor="theme-select" style={{ 
+      fontWeight: 'bold',
+      color: 'var(--decap-text, #333)',
+      fontSize: '14px'
+    }}>
+      🎨 Theme:
+    </label>
+    <select 
+      id="theme-select"
+      value={currentTheme} 
+      onChange={(e) => onThemeChange(e.target.value as 'light' | 'dark' | 'auto')}
+      style={{ 
+        padding: '8px 12px', 
+        borderRadius: '6px', 
+        border: '1px solid var(--decap-border, #ccc)',
+        fontSize: '14px',
+        background: 'var(--decap-background, white)',
+        color: 'var(--decap-text, #333)',
+        cursor: 'pointer'
+      }}
+    >
+      <option value="light">☀️ Light Theme</option>
+      <option value="dark">🌙 Dark Theme</option>
+      <option value="auto">🔄 Auto (System)</option>
+    </select>
+    <span style={{ 
+      fontSize: '12px', 
+      color: 'var(--decap-text-secondary, #666)',
+      background: 'var(--decap-primary-light, #e3f2fd)',
+      padding: '4px 8px',
+      borderRadius: '4px'
+    }}>
+      Active: {currentTheme}
+    </span>
+  </div>
 );
 
-// Advanced Mode Test
-const AdvancedTest = () => (
-  <DeCap
-    mode="advanced"
-    userWallet={mockWallet}
-    onSuccess={handleSuccess}
-    onFailure={handleFailure}
-    className="test-button"
-  >
-    Test Advanced Mode (Puzzle + Wallet)
-  </DeCap>
-);
+// Main Test App Component
+const TestApp = () => {
+  const [selectedTheme, setSelectedTheme] = useState<'light' | 'dark' | 'auto'>('light');
 
-// Render components
-const simpleRoot = createRoot(document.getElementById('decap-simple')!);
-const advancedRoot = createRoot(document.getElementById('decap-advanced')!);
+  // Simple Mode Test
+  const SimpleTest = () => (
+    <DeCap
+      mode="simple"
+      userWallet={mockWallet}
+      onSuccess={handleSuccess}
+      onFailure={handleFailure}
+      className="test-button"
+    >
+      Test Simple Mode (Puzzle Only)
+    </DeCap>
+  );
 
-simpleRoot.render(<SimpleTest />);
-advancedRoot.render(<AdvancedTest />);
+  // Advanced Mode Test
+  const AdvancedTest = () => (
+    <DeCap
+      mode="advanced"
+      userWallet={mockWallet}
+      onSuccess={handleSuccess}
+      onFailure={handleFailure}
+      className="test-button"
+    >
+      Test Advanced Mode (Puzzle + Wallet)
+    </DeCap>
+  );
+
+  return (
+    <ThemeProvider theme={selectedTheme}>
+      <div className="test-container" style={{ 
+        padding: '40px', 
+        fontFamily: 'Arial, sans-serif',
+        background: 'var(--decap-background, white)',
+        color: 'var(--decap-text, #333)',
+        borderRadius: '16px',
+        boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+        maxWidth: '600px',
+        width: '100%',
+        transition: 'all 0.3s ease'
+      }}>
+        <h1 style={{ color: 'var(--decap-primary, #007AFF)', marginBottom: '10px' }}>
+          🔐 DeCap SDK Theme Testing
+        </h1>
+        <p style={{ color: 'var(--decap-text-secondary, #666)', marginBottom: '30px' }}>
+          Test theme switching and component behavior
+        </p>
+        
+        <ThemeSelector 
+          currentTheme={selectedTheme} 
+          onThemeChange={setSelectedTheme} 
+        />
+        
+        <div className="wallet-info" style={{
+          background: 'var(--decap-surface, #f5f7fa)',
+          padding: '16px',
+          borderRadius: '8px',
+          margin: '20px 0',
+          fontSize: '14px',
+          color: 'var(--decap-text-secondary, #666)',
+          border: '1px solid var(--decap-border, #e1e5e9)'
+        }}>
+          <strong>Mock Wallet:</strong> 0x1234...5678<br />
+          <small>This is a simulated wallet for testing purposes</small>
+        </div>
+        
+        <div style={{ marginBottom: '20px' }}>
+          <h2 style={{ color: 'var(--decap-text, #333)', fontSize: '18px' }}>Simple Mode Test</h2>
+          <SimpleTest />
+        </div>
+        
+        <div style={{ marginBottom: '20px' }}>
+          <h2 style={{ color: 'var(--decap-text, #333)', fontSize: '18px' }}>Advanced Mode Test</h2>
+          <AdvancedTest />
+        </div>
+        
+        <div style={{ marginTop: '30px' }}>
+          <h3 style={{ color: 'var(--decap-text, #333)', fontSize: '16px' }}>Result:</h3>
+          <pre id="result" className="result" style={{ 
+            padding: '16px', 
+            border: '1px solid var(--decap-border, #e1e5e9)', 
+            borderRadius: '8px',
+            background: 'var(--decap-surface, #f5f5f5)',
+            color: 'var(--decap-text, #333)',
+            minHeight: '100px',
+            whiteSpace: 'pre-wrap',
+            fontFamily: 'monospace',
+            fontSize: '12px',
+            textAlign: 'left'
+          }}>
+            Click a button above to test verification...
+          </pre>
+        </div>
+      </div>
+    </ThemeProvider>
+  );
+};
+
+// Render the main app
+const appRoot = createRoot(document.getElementById('app')!);
+appRoot.render(<TestApp />);

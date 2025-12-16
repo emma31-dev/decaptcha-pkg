@@ -1,7 +1,8 @@
 // DeCap main component
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { DeCapProps } from '../types';
 import { generateChallenge } from '../lib/challenge';
+import { ThemeProvider } from '../themes/ThemeProvider';
 import './DeCap.css';
 
 export const DeCap: React.FC<DeCapProps> = ({
@@ -11,8 +12,11 @@ export const DeCap: React.FC<DeCapProps> = ({
   onFailure,
   className,
   children,
+  theme = 'light',
+  useTheme,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [challenge, setChallenge] = useState(() => generateChallenge(mode === 'simple' ? 'easy' : 'medium'));
   const [sliderValue, setSliderValue] = useState(0);
@@ -24,11 +28,16 @@ export const DeCap: React.FC<DeCapProps> = ({
   const [walletSigning, setWalletSigning] = useState(false);
   const [walletSigned, setWalletSigned] = useState(false);
   const [walletSignature, setWalletSignature] = useState<string | null>(null);
-  const [showFinalSuccess, setShowFinalSuccess] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [nextStep, setNextStep] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [dragStartValue, setDragStartValue] = useState<number | null>(null);
+
+  // Theme detection with memoization for performance
+  const currentTheme = useMemo(() => {
+    if (theme === 'auto' && useTheme) {
+      return useTheme();
+    }
+    return theme;
+  }, [theme, useTheme]);
 
   // Timer countdown
   useEffect(() => {
@@ -54,12 +63,10 @@ export const DeCap: React.FC<DeCapProps> = ({
 
     const handleGlobalMouseUp = () => {
       setIsDragging(false);
-      setDragStartValue(null);
     };
 
     const handleGlobalTouchEnd = () => {
       setIsDragging(false);
-      setDragStartValue(null);
     };
 
     document.addEventListener('mouseup', handleGlobalMouseUp);
@@ -104,9 +111,29 @@ export const DeCap: React.FC<DeCapProps> = ({
         setShowSuccess(true);
         setIsCompleted(true);
         
+        // Ensure state is updated before calling handleContinue
         setTimeout(() => {
-          handleContinue();
-        }, 1000);
+          if (mode === 'simple') {
+            // Simple mode: animate to success page, then complete
+            animateToStep(2);
+            
+            // Auto-close after 2 seconds and call onSuccess
+            setTimeout(() => {
+              onSuccess({
+                success: true,
+                puzzleCompleted: true,
+                token: `decap_${Date.now()}`,
+                timestamp: Date.now(),
+                challengeId: challenge.id,
+                mode,
+              });
+              closeModalAnimated();
+            }, 2000);
+          } else {
+            // Advanced mode: proceed to wallet signing
+            animateToStep(2);
+          }
+        }, 500);
       }, 2000);
       
       setAlignmentTimer(timer);
@@ -120,24 +147,20 @@ export const DeCap: React.FC<DeCapProps> = ({
     }
   };
 
-  const handleSliderMouseDown = (e: React.MouseEvent) => {
+  const handleSliderMouseDown = () => {
     setIsDragging(true);
-    setDragStartValue(sliderValue);
   };
 
   const handleSliderMouseUp = () => {
     setIsDragging(false);
-    setDragStartValue(null);
   };
 
-  const handleSliderTouchStart = (e: React.TouchEvent) => {
+  const handleSliderTouchStart = () => {
     setIsDragging(true);
-    setDragStartValue(sliderValue);
   };
 
   const handleSliderTouchEnd = () => {
     setIsDragging(false);
-    setDragStartValue(null);
   };
 
   const handleSliderClick = (e: React.MouseEvent) => {
@@ -153,9 +176,8 @@ export const DeCap: React.FC<DeCapProps> = ({
     if (mode === 'simple') {
       // Simple mode: animate to success page, then complete
       animateToStep(2);
-      setShowFinalSuccess(true);
       
-      // Auto-close after 4 seconds and call onSuccess
+      // Auto-close after 3 seconds and call onSuccess
       setTimeout(() => {
         onSuccess({
           success: true,
@@ -165,17 +187,16 @@ export const DeCap: React.FC<DeCapProps> = ({
           challengeId: challenge.id,
           mode,
         });
-        setIsModalOpen(false);
-      }, 4000);
+        closeModalAnimated();
+      }, 500);
     } else if (currentStep === 1) {
       // Advanced mode: proceed to wallet signing with animation
       animateToStep(2);
     } else if (currentStep === 2) {
       // Advanced mode: proceed to final success page with animation
       animateToStep(3);
-      setShowFinalSuccess(true);
       
-      // Auto-close after 5 seconds and call onSuccess
+      // Auto-close after 2 seconds and call onSuccess
       setTimeout(() => {
         onSuccess({
           success: true,
@@ -186,8 +207,8 @@ export const DeCap: React.FC<DeCapProps> = ({
           challengeId: challenge.id,
           mode,
         });
-        setIsModalOpen(false);
-      }, 5000);
+        closeModalAnimated();
+      }, 2000);
     }
   };
 
@@ -195,12 +216,10 @@ export const DeCap: React.FC<DeCapProps> = ({
     if (isTransitioning) return;
     
     setIsTransitioning(true);
-    setNextStep(step);
     
     // After fade out completes, change step and fade in
     setTimeout(() => {
       setCurrentStep(step);
-      setNextStep(null);
       
       // Small delay then fade in
       setTimeout(() => {
@@ -215,8 +234,13 @@ export const DeCap: React.FC<DeCapProps> = ({
     setWalletSigning(true);
     
     try {
-      // Generate nonce message
-      const nonce = Math.random().toString(36).substring(2, 15);
+      // Generate UUID nonce message
+      const nonce = crypto.randomUUID ? crypto.randomUUID() : 
+        'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+          const r = Math.random() * 16 | 0;
+          const v = c === 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        });
       const message = `DeCap Verification\nNonce: ${nonce}\nChallenge: ${challenge.id}\nTimestamp: ${Date.now()}`;
       
       // Sign message with wallet
@@ -226,10 +250,25 @@ export const DeCap: React.FC<DeCapProps> = ({
       setWalletSigned(true);
       setWalletSigning(false);
       
-      // Auto-continue after 1.5 seconds with animation
+      // Auto-continue after 0.5 seconds - bypass handleContinue guards
       setTimeout(() => {
-        handleContinue();
-      }, 1500);
+        // Advanced mode: proceed to final success page with animation
+        animateToStep(3);
+        
+        // Auto-close after 2 seconds and call onSuccess
+        setTimeout(() => {
+          onSuccess({
+            success: true,
+            puzzleCompleted: true,
+            walletSignature: signature,
+            token: `decap_${Date.now()}`,
+            timestamp: Date.now(),
+            challengeId: challenge.id,
+            mode,
+          });
+          closeModalAnimated();
+        }, 2000);
+      }, 500);
       
     } catch (error) {
       console.error('Wallet signing failed:', error);
@@ -251,11 +290,14 @@ export const DeCap: React.FC<DeCapProps> = ({
     setWalletSigning(false);
     setWalletSigned(false);
     setWalletSignature(null);
-    setShowFinalSuccess(false);
     setIsTransitioning(false);
-    setNextStep(null);
     setIsDragging(false);
-    setDragStartValue(null);
+    
+    // Prevent body scroll on mobile
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    
     if (alignmentTimer) {
       clearTimeout(alignmentTimer);
       setAlignmentTimer(null);
@@ -263,21 +305,51 @@ export const DeCap: React.FC<DeCapProps> = ({
   };
 
   const closeModal = () => {
-    setIsModalOpen(false);
-    onFailure();
+    setIsClosing(true);
+    
+    // Wait for animation to complete before actually closing
+    setTimeout(() => {
+      setIsModalOpen(false);
+      setIsClosing(false);
+      
+      // Restore body scroll
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      
+      onFailure();
+    }, 300); // Match animation duration
+  };
+
+  const closeModalAnimated = () => {
+    setIsClosing(true);
+    
+    // Wait for animation to complete before actually closing
+    setTimeout(() => {
+      setIsModalOpen(false);
+      setIsClosing(false);
+      
+      // Restore body scroll
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    }, 300); // Match animation duration
   };
 
   const totalSteps = mode === 'simple' ? 2 : 3;
 
   return (
-    <>
+    <ThemeProvider theme={theme} useTheme={useTheme}>
       <div className={className} onClick={openModal}>
         {children}
       </div>
       
       {isModalOpen && (
-        <div className="decap-modal-overlay">
-          <div className="decap-modal">
+        <div className={`decap-modal-overlay ${currentTheme} ${isClosing ? 'closing' : ''}`} data-theme={currentTheme}>
+          <div className={`decap-modal ${currentTheme} ${isClosing ? 'closing' : ''}`} data-theme={currentTheme}>
+            {/* Mobile Drawer Handle */}
+            <div className="decap-drawer-handle"></div>
+            
             {/* Header */}
             <div className="decap-modal-header">
               <button className="decap-close-btn" onClick={closeModal}>×</button>
@@ -291,14 +363,16 @@ export const DeCap: React.FC<DeCapProps> = ({
               </div>
             </div>
 
-            {/* Title and Timer */}
-            <div className="decap-title-section">
-              <h2 className="decap-title">Complete verification</h2>
-              <div className="decap-timer">{formatTime(timeLeft)}</div>
-            </div>
+            {/* Main Content Container */}
+            <div className="decap-modal-content">
+              {/* Title and Timer */}
+              <div className="decap-title-section">
+                <h2 className="decap-title">Complete verification</h2>
+                <div className="decap-timer">{formatTime(timeLeft)}</div>
+              </div>
 
-            {/* Animated Step Container */}
-            <div className={`decap-step-container ${isTransitioning ? 'transitioning' : ''}`}>
+              {/* Animated Step Container */}
+              <div className={`decap-step-container ${isTransitioning ? 'transitioning' : ''}`}>
               {currentStep === 1 && (
               <div className="decap-puzzle-step">
                 {/* Word Display */}
@@ -345,7 +419,8 @@ export const DeCap: React.FC<DeCapProps> = ({
                       <div 
                         className="decap-slider-thumb"
                         style={{ 
-                          left: `calc(${sliderValue}% - 28px)`
+                          left: `${sliderValue}%`,
+                          transform: 'translateX(-50%)'
                         }}
                       >
                         <div className="decap-letter-tile">
@@ -357,7 +432,8 @@ export const DeCap: React.FC<DeCapProps> = ({
                       <div 
                         className="decap-slider-circle"
                         style={{ 
-                          left: `calc(${sliderValue}% - 10px)`
+                          left: `${sliderValue}%`,
+                          transform: 'translateX(-50%)'
                         }}
                       />
                       
@@ -384,14 +460,7 @@ export const DeCap: React.FC<DeCapProps> = ({
 
 
 
-                {/* Continue Button */}
-                <button 
-                  className={`decap-continue-btn ${showSuccess ? 'enabled' : ''}`}
-                  onClick={handleContinue}
-                  disabled={!showSuccess}
-                >
-                  Continue →
-                </button>
+
               </div>
             )}
 
@@ -419,31 +488,32 @@ export const DeCap: React.FC<DeCapProps> = ({
                   </button>
                 )}
 
-                <button 
-                  className={`decap-continue-btn ${walletSigned ? 'enabled' : ''}`}
-                  onClick={handleContinue}
-                  disabled={!walletSigned}
-                >
-                  Continue →
-                </button>
+
+
+
               </div>
             )}
 
             {((currentStep === 2 && mode === 'simple') || currentStep === 3) && (
-              <div className="decap-success-final">
-                <div className="decap-success-icon">
-                  <div className="decap-checkmark">✓</div>
+              <div className={`decap-success-final ${currentTheme}`}>
+                <div className="decap-success-popup">
+                  <div className="decap-success-icon-simple">
+                    <div className="decap-checkmark-simple">✓</div>
+                  </div>
+                  
+                  <div className="decap-success-content">
+                    <h2 className="decap-success-title-optimized">Verified</h2>
+                    <p className="decap-success-subtitle">Thank you for your patience</p>
+                  </div>
                 </div>
-
-                <h2 className="decap-success-title">Verification Complete</h2>
-                <p className="decap-success-message">Thank you for your patience</p>
               </div>
             )}
+              </div>
             </div>
           </div>
         </div>
       )}
-    </>
+    </ThemeProvider>
   );
 };
 
