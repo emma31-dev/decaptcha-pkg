@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 14%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 14%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 258 90% 66%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 222 47% 20%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 222 30% 25%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 4 90% 70%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 222 30% 22%;
+    --input: 222 30% 22%;
+    --ring: 258 90% 66%;
+
+    --radius: 1rem;
+
+    /* Custom tokens */
+    --coral: 4 90% 70%;
+    --gold: 45 100% 51%;
+    --cyan: 187 100% 50%;
+    --purple-gradient-start: 258 90% 66%;
+    --purple-gradient-end: 280 80% 55%;
+  }
+
+  .dark {
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 14%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 14%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 258 90% 66%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 222 47% 20%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 222 30% 25%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 4 90% 70%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 222 30% 22%;
+    --input: 222 30% 22%;
+    --ring: 258 90% 66%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+}
+
+@layer utilities {
+  .gradient-purple {
+    background: linear-gradient(135deg, hsl(var(--purple-gradient-start)), hsl(var(--purple-gradient-end)));
+  }
+  
+  .gradient-coral {
+    background: linear-gradient(135deg, hsl(var(--coral)), hsl(10, 85%, 65%));
+  }
+
+  .glass-card {
+    background: hsl(var(--card) / 0.8);
+    backdrop-filter: blur(12px);
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--purple-gradient-end)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
