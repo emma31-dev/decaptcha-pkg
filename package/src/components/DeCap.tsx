@@ -14,6 +14,7 @@ export const DeCap: React.FC<DeCapProps> = ({
   children,
   theme = 'light',
   useTheme,
+  reputationScore,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -30,6 +31,21 @@ export const DeCap: React.FC<DeCapProps> = ({
   const [walletSignature, setWalletSignature] = useState<string | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+
+  // Determine actual mode based on reputation score when mode is 'auto'
+  const actualMode = useMemo(() => {
+    if (mode !== 'auto') return mode;
+    
+    if (reputationScore !== undefined) {
+      // Use provided reputation score to determine mode
+      if (reputationScore >= 70) return 'bypass'; // Skip CAPTCHA entirely
+      if (reputationScore >= 40) return 'simple'; // Simple CAPTCHA
+      return 'advanced'; // Full CAPTCHA + wallet signature
+    }
+    
+    // Fallback to simple mode if no reputation score provided
+    return 'simple';
+  }, [mode, reputationScore]);
 
   // Theme detection with memoization for performance
   const currentTheme = useMemo(() => {
@@ -113,7 +129,7 @@ export const DeCap: React.FC<DeCapProps> = ({
         
         // Ensure state is updated before calling handleContinue
         setTimeout(() => {
-          if (mode === 'simple') {
+          if (actualMode === 'simple') {
             // Simple mode: animate to success page, then complete
             animateToStep(2);
             
@@ -125,7 +141,7 @@ export const DeCap: React.FC<DeCapProps> = ({
                 token: `decap_${Date.now()}`,
                 timestamp: Date.now(),
                 challengeId: challenge.id,
-                mode,
+                mode: mode, // Original mode (could be 'auto')
               });
               closeModalAnimated();
             }, 2000);
@@ -173,7 +189,7 @@ export const DeCap: React.FC<DeCapProps> = ({
     if (currentStep === 1 && !showSuccess) return; // Only allow continue after successful alignment
     if (currentStep === 2 && !walletSigned) return; // Only allow continue after successful signing
     
-    if (mode === 'simple') {
+    if (actualMode === 'simple') {
       // Simple mode: animate to success page, then complete
       animateToStep(2);
       
@@ -185,7 +201,7 @@ export const DeCap: React.FC<DeCapProps> = ({
           token: `decap_${Date.now()}`,
           timestamp: Date.now(),
           challengeId: challenge.id,
-          mode,
+          mode: mode, // Original mode (could be 'auto')
         });
         closeModalAnimated();
       }, 500);
@@ -205,7 +221,7 @@ export const DeCap: React.FC<DeCapProps> = ({
           token: `decap_${Date.now()}`,
           timestamp: Date.now(),
           challengeId: challenge.id,
-          mode,
+          mode: mode, // Original mode (could be 'auto')
         });
         closeModalAnimated();
       }, 2000);
@@ -264,7 +280,7 @@ export const DeCap: React.FC<DeCapProps> = ({
             token: `decap_${Date.now()}`,
             timestamp: Date.now(),
             challengeId: challenge.id,
-            mode,
+            mode: mode, // Original mode (could be 'auto')
           });
           closeModalAnimated();
         }, 2000);
@@ -279,9 +295,22 @@ export const DeCap: React.FC<DeCapProps> = ({
   };
 
   const openModal = () => {
+    // Handle bypass mode - skip CAPTCHA entirely
+    if (actualMode === 'bypass') {
+      onSuccess({
+        success: true,
+        puzzleCompleted: true,
+        token: `decap_bypass_${Date.now()}`,
+        timestamp: Date.now(),
+        challengeId: `bypass_${Date.now()}`,
+        mode: 'auto', // Original mode was auto
+      });
+      return;
+    }
+
     setIsModalOpen(true);
     setCurrentStep(1);
-    setChallenge(generateChallenge(mode === 'simple' ? 'easy' : 'medium'));
+    setChallenge(generateChallenge(actualMode === 'simple' ? 'easy' : 'medium'));
     setSliderValue(0);
     setTimeLeft(20);
     setIsCompleted(false);
@@ -336,7 +365,7 @@ export const DeCap: React.FC<DeCapProps> = ({
     }, 300); // Match animation duration
   };
 
-  const totalSteps = mode === 'simple' ? 2 : 3;
+  const totalSteps = actualMode === 'simple' ? 2 : 3;
 
   return (
     <ThemeProvider theme={theme} useTheme={useTheme}>
@@ -464,7 +493,7 @@ export const DeCap: React.FC<DeCapProps> = ({
               </div>
             )}
 
-            {currentStep === 2 && mode === 'advanced' && (
+            {currentStep === 2 && actualMode === 'advanced' && (
               <div className="decap-wallet-step">
                 <h2 className="decap-wallet-title">Sign Nonce Message</h2>
                 
@@ -494,7 +523,7 @@ export const DeCap: React.FC<DeCapProps> = ({
               </div>
             )}
 
-            {((currentStep === 2 && mode === 'simple') || currentStep === 3) && (
+            {((currentStep === 2 && actualMode === 'simple') || currentStep === 3) && (
               <div className={`decap-success-final ${currentTheme}`}>
                 <div className="decap-success-popup">
                   <div className="decap-success-icon-simple">

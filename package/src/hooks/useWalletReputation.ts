@@ -1,8 +1,13 @@
 /**
- * useWalletReputation hook - Reputation system integration
+ * useWalletReputation hook - Custom Reputation system integration
  * 
  * Manages wallet reputation fetching, caching, and auto mode logic
- * for determining CAPTCHA difficulty based on onchain reputation.
+ * for determining CAPTCHA difficulty based on custom onchain reputation scoring.
+ * 
+ * Trust Levels:
+ * - High Trust (70+): Skip CAPTCHA entirely
+ * - Medium Trust (40-69): Simple CAPTCHA challenge  
+ * - Low Trust (<40): Advanced CAPTCHA challenge
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -33,9 +38,9 @@ export interface UseWalletReputationReturn {
 }
 
 export interface UseWalletReputationOptions {
-  // Reputation thresholds
-  bypassThreshold?: number; // Default: 70
-  easyThreshold?: number;   // Default: 50
+  // Reputation thresholds (Updated for custom scoring)
+  bypassThreshold?: number; // Default: 70 (High Trust)
+  easyThreshold?: number;   // Default: 40 (Medium Trust)
   
   // Caching options
   cacheExpiry?: number;     // Default: 5 minutes
@@ -51,7 +56,7 @@ export const useWalletReputation = (
 ): UseWalletReputationReturn => {
   const {
     bypassThreshold = 70,
-    easyThreshold = 50,
+    easyThreshold = 40, // Updated threshold for custom scoring
     cacheExpiry = 300000, // 5 minutes
     autoRefresh = true,
     autoFetch = true,
@@ -71,11 +76,11 @@ export const useWalletReputation = (
   const currentWalletRef = useRef<string | null>(null);
   const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
   
-  // Auto mode logic
+  // Auto mode logic - Updated for custom scoring thresholds
   const determineCaptchaMode = useCallback((score: number): 'bypass' | 'simple' | 'advanced' => {
-    if (score >= thresholds.bypass) return 'bypass';
-    if (score >= thresholds.easy) return 'simple';
-    return 'advanced';
+    if (score >= thresholds.bypass) return 'bypass'; // High Trust (70+)
+    if (score >= thresholds.easy) return 'simple';   // Medium Trust (40-69)
+    return 'advanced';                               // Low Trust (<40)
   }, [thresholds.bypass, thresholds.easy]);
   
   const getRecommendedMode = useCallback((): 'simple' | 'advanced' | null => {

@@ -32,10 +32,10 @@
 }
 
 .decap-modal {
-  background: var(--decap-background, rgba(255, 255, 255, 0.95));
+  background: var(--decap-color-background, rgba(255, 255, 255, 0.95));
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--decap-border, rgba(255, 255, 255, 0.2));
+  border: 1px solid var(--decap-color-text-secondary, rgba(255, 255, 255, 0.2));
   border-radius: 20px;
   padding: 28px;
   width: 440px;
@@ -44,7 +44,7 @@
   max-height: 80vh;
   box-shadow: 
     0 32px 64px rgba(0, 0, 0, 0.2),
-    0 0 0 1px var(--decap-border-light, rgba(255, 255, 255, 0.1)) inset;
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
   position: relative;
   animation: decap-modal-enter 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   
@@ -85,7 +85,7 @@
     display: block;
     width: 40px;
     height: 4px;
-    background: var(--decap-text-secondary, rgba(0, 0, 0, 0.2));
+    background: var(--decap-color-text-secondary, rgba(0, 0, 0, 0.2));
     border-radius: 2px;
     margin: 0 auto 16px;
     position: absolute;
@@ -120,7 +120,7 @@
   background: none;
   border: none;
   font-size: 28px;
-  color: var(--decap-text-secondary, #666);
+  color: var(--decap-color-text-secondary, #666);
   cursor: pointer;
   padding: 8px;
   border-radius: 8px;
@@ -133,7 +133,7 @@
 }
 
 .decap-close-btn:hover {
-  background-color: var(--decap-surface, #f0f0f0);
+  background-color: var(--decap-color-surface, #f0f0f0);
 }
 
 .decap-progress-bars {
@@ -145,12 +145,12 @@
   width: 32px;
   height: 6px;
   border-radius: 3px;
-  background-color: var(--decap-border, #e0e0e0);
+  background-color: var(--decap-color-text-secondary, #e0e0e0);
   transition: background-color 0.3s ease-out, transform 0.2s ease-out;
 }
 
 .decap-progress-bar.active {
-  background-color: var(--decap-text, #333);
+  background-color: var(--decap-color-text, #333);
   transform: scaleY(1.3);
 }
 
@@ -180,19 +180,19 @@
 .decap-title {
   font-size: 22px;
   font-weight: 600;
-  color: var(--decap-text, #333);
+  color: var(--decap-color-text, #333);
   text-align: center;
   margin: 0;
 }
 
 /* Timer */
 .decap-timer {
-  background: var(--decap-surface, #f5f5f5);
+  background: var(--decap-color-surface, #f5f5f5);
   padding: 6px 12px;
   border-radius: 16px;
   font-size: 16px;
   font-weight: 600;
-  color: var(--decap-text-secondary, #666);
+  color: var(--decap-color-text-secondary, #666);
   align-self: flex-end;
 }
 
@@ -214,25 +214,25 @@
 .decap-letter-slot {
   width: 48px;
   height: 48px;
-  border: 2px solid var(--decap-border, #e0e0e0);
+  border: 2px solid var(--decap-color-text-secondary, #e0e0e0);
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 24px;
   font-weight: 600;
-  color: var(--decap-text, #333);
-  background: var(--decap-background, white);
+  color: var(--decap-color-text, #333);
+  background: var(--decap-color-background, white);
 }
 
 .decap-letter-slot.missing {
-  border: 2px dashed var(--decap-border-light, #ccc);
-  background: var(--decap-surface, #f9f9f9);
+  border: 2px dashed var(--decap-color-text-secondary, #ccc);
+  background: var(--decap-color-surface, #f9f9f9);
 }
 
 .decap-letter-slot.filled {
-  border: 2px solid var(--decap-success, #4CAF50);
-  background: var(--decap-success, #4CAF50);
+  border: 2px solid var(--decap-color-success, #4CAF50);
+  background: var(--decap-color-success, #4CAF50);
   color: white;
   animation: decap-success-fill 0.2s ease-out;
 }
@@ -252,8 +252,8 @@
 .decap-letter-tile {
   width: 64px;
   height: 64px;
-  background: linear-gradient(135deg, var(--decap-text, #333) 0%, var(--decap-text-secondary, #555) 100%);
-  color: var(--decap-background, white);
+  background: linear-gradient(135deg, var(--decap-color-text, #333) 0%, var(--decap-color-text-secondary, #555) 100%);
+  color: var(--decap-color-background, white);
   border-radius: 16px;
   display: flex;
   align-items: center;
@@ -263,7 +263,7 @@
   cursor: grab;
   box-shadow: 
     0 4px 12px rgba(0, 0, 0, 0.15),
-    0 0 0 1px var(--decap-border-light, rgba(255, 255, 255, 0.1)) inset;
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
   position: relative;
   z-index: 2;
 }
@@ -294,7 +294,7 @@
 
 .decap-slider-track {
   height: 8px;
-  background: linear-gradient(90deg, var(--decap-surface, #f0f0f0) 0%, var(--decap-border, #e0e0e0) 100%);
+  background: linear-gradient(90deg, var(--decap-color-surface, #f0f0f0) 0%, var(--decap-color-text-secondary, #e0e0e0) 100%);
   border-radius: 4px;
   position: relative;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) inset;
@@ -325,11 +325,11 @@
   top: -6px; /* Center on 8px track */
   width: 20px;
   height: 20px;
-  background: linear-gradient(135deg, var(--decap-text, #333) 0%, var(--decap-text-secondary, #555) 100%);
+  background: linear-gradient(135deg, var(--decap-color-text, #333) 0%, var(--decap-color-text-secondary, #555) 100%);
   border-radius: 50%;
   box-shadow: 
     0 2px 6px rgba(0, 0, 0, 0.2),
-    0 0 0 1px var(--decap-border-light, rgba(255, 255, 255, 0.1)) inset;
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
   z-index: 2; /* Above track, below input */
   pointer-events: none; /* Make it non-interactive */
   user-select: none; /* Prevent selection */
@@ -390,7 +390,7 @@
 
 .decap-slider-instruction {
   font-size: 16px;
-  color: var(--decap-text-secondary, #666);
+  color: var(--decap-color-text-secondary, #666);
   text-align: center;
   font-weight: 500;
 }
@@ -399,8 +399,8 @@
 .decap-continue-btn {
   width: 100%;
   padding: 16px 32px;
-  background: var(--decap-text-secondary, #999);
-  color: var(--decap-background, white);
+  background: var(--decap-color-text-secondary, #999);
+  color: var(--decap-color-background, white);
   border: none;
   border-radius: 12px;
   font-size: 18px;
@@ -414,7 +414,7 @@
 }
 
 .decap-continue-btn:hover {
-  background: var(--decap-text-muted, #777);
+  background: var(--decap-color-text-secondary, #777);
 }
 
 .decap-continue-btn:active {
@@ -422,21 +422,21 @@
 }
 
 .decap-continue-btn.enabled {
-  background: var(--decap-text, #333);
+  background: var(--decap-color-text, #333);
 }
 
 .decap-continue-btn.enabled:hover {
-  background: var(--decap-text-secondary, #555);
+  background: var(--decap-color-text-secondary, #555);
 }
 
 .decap-continue-btn:disabled {
-  background: var(--decap-text-secondary, #999);
+  background: var(--decap-color-text-secondary, #999);
   cursor: not-allowed;
 }
 
 /* Success Messages */
 .decap-success-message {
-  color: var(--decap-success, #4CAF50);
+  color: var(--decap-color-success, #4CAF50);
   font-size: 18px;
   font-weight: 600;
   text-align: center;
@@ -466,18 +466,18 @@
 .decap-wallet-title {
   font-size: 22px;
   font-weight: 600;
-  color: var(--decap-text, #333);
+  color: var(--decap-color-text, #333);
   margin: 0;
   text-align: center;
 }
 
 .decap-wallet-description {
-  background: var(--decap-surface, #e8e8e8);
-  border: 2px solid var(--decap-text, #333);
+  background: var(--decap-color-surface, #e8e8e8);
+  border: 2px solid var(--decap-color-text, #333);
   padding: 20px;
   border-radius: 12px;
   font-size: 16px;
-  color: var(--decap-text-secondary, #666);
+  color: var(--decap-color-text-secondary, #666);
   text-align: center;
   line-height: 1.5;
   max-width: 360px;
@@ -485,8 +485,8 @@
 
 .decap-sign-btn {
   padding: 16px 32px;
-  background: var(--decap-primary, #007AFF);
-  color: var(--decap-background, white);
+  background: var(--decap-color-primary, #007AFF);
+  color: var(--decap-color-background, white);
   border: none;
   border-radius: 12px;
   font-size: 18px;
@@ -497,11 +497,11 @@
 }
 
 .decap-sign-btn:hover:not(:disabled) {
-  background: var(--decap-primary-dark, #0056CC);
+  background: var(--decap-color-primary, #0056CC);
 }
 
 .decap-sign-btn:disabled {
-  background: var(--decap-text-secondary, #999);
+  background: var(--decap-color-text-secondary, #999);
   cursor: not-allowed;
 }
 
@@ -539,7 +539,7 @@
 .decap-success-icon-simple {
   width: 120px;
   height: 120px;
-  background: var(--decap-success, #4CAF50);
+  background: var(--decap-color-success, #4CAF50);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -548,12 +548,12 @@
   animation: decap-success-bounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   box-shadow: 
     0 8px 24px rgba(76, 175, 80, 0.3),
-    0 0 0 1px var(--decap-border-light, rgba(255, 255, 255, 0.1)) inset;
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
 }
 
 .decap-checkmark-simple {
   font-size: 48px;
-  color: var(--decap-background, white);
+  color: white;
   font-weight: bold;
   line-height: 1;
   animation: decap-checkmark-pop 0.3s ease-out 0.3s both;
@@ -596,14 +596,14 @@
   font-size: 24px;
   font-weight: 600;
   margin: 0;
-  color: var(--decap-text, #333);
+  color: var(--decap-color-text, #333);
   animation: decap-text-slide-up 0.4s ease-out 1.2s both;
 }
 
 .decap-success-subtitle {
   font-size: 16px;
   margin: 0;
-  color: var(--decap-text-secondary, #666);
+  color: var(--decap-color-text-secondary, #666);
   opacity: 0.7;
   animation: decap-text-slide-up 0.4s ease-out 1.4s both;
 }
@@ -701,8 +701,6 @@
   animation: decap-success-appear 0.2s ease-out;
 }
 
-
-
 /* Mobile Drawer Styling */
 @media (max-width: 600px) {
   .decap-modal-overlay {
@@ -765,7 +763,6 @@
 .decap-shake {
   animation: decap-shake 0.5s ease-in-out;
 }
-/* Theme Support - Now handled via CSS custom properties */
 
 /* Performance Optimizations */
 .decap-success-popup,
@@ -801,8 +798,8 @@
   backface-visibility: hidden;
   perspective: 1000px;
 }
-/* Modal
- Closing Animations */
+
+/* Modal Closing Animations */
 .decap-modal-overlay.closing {
   animation: decap-overlay-exit 0.3s ease-out forwards;
 }
@@ -856,8 +853,9 @@
     opacity: 0;
     transform: translateY(100%);
   }
-}/*
- Modal Content Wrapper */
+}
+
+/* Modal Content Wrapper */
 .decap-modal-content {
   flex: 1;
   display: flex;
@@ -872,8 +870,9 @@
     padding-top: 140px;
     padding-bottom: 40px;
   }
-}/* Mobile
- Scroll Prevention */
+}
+
+/* Mobile Scroll Prevention */
 @media (max-width: 600px) {
   .decap-modal-overlay {
     width: 100vw;

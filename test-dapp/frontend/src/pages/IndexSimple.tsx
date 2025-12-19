@@ -2,65 +2,17 @@ import { Settings, Coins } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { MissionCard } from "@/components/MissionCard";
 import { ProductCard } from "@/components/ProductCard";
-import { DeCap } from "decap-sdk";
-import { walletManager, type WalletConnection } from "@/utils/mockWallet";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
-const Index = () => {
+const IndexSimple = () => {
   const [coins, setCoins] = useState(0.0);
-  const [isClaimingReward, setIsClaimingReward] = useState(false);
-  const [wallet, setWallet] = useState<WalletConnection | null>(null);
-  const [isConnectingWallet, setIsConnectingWallet] = useState(false);
 
-  // Connect wallet on component mount
-  useEffect(() => {
-    const connectWallet = async () => {
-      setIsConnectingWallet(true);
-      try {
-        const walletConnection = await walletManager.connect();
-        setWallet(walletConnection);
-        
-        if (walletConnection.address !== '0x742d35Cc6634C0532925a3b8D4C9db96590c6C87') {
-          toast.success("Wallet Connected!", {
-            description: `Connected to ${walletConnection.address.slice(0, 6)}...${walletConnection.address.slice(-4)}`,
-            duration: 3000,
-          });
-        }
-      } catch (error) {
-        console.error('Failed to connect wallet:', error);
-        toast.error("Wallet Connection Failed", {
-          description: "Using demo mode instead.",
-          duration: 3000,
-        });
-      } finally {
-        setIsConnectingWallet(false);
-      }
-    };
-
-    connectWallet();
-  }, []);
-
-  const handleClaimSuccess = (proof: any) => {
-    console.log('✅ DeCap Verification Success:', proof);
-    
-    // Simulate claiming 50,000 coins
+  const handleClaimClick = () => {
     setCoins(prev => prev + 50000);
-    setIsClaimingReward(false);
-    
     toast.success("🎉 Reward Claimed!", {
-      description: "You've successfully earned 50,000 coins with DeCap verification!",
+      description: "You've successfully earned 50,000 coins!",
       duration: 4000,
-    });
-  };
-
-  const handleClaimFailure = () => {
-    console.log('❌ DeCap Verification Failed');
-    setIsClaimingReward(false);
-    
-    toast.error("Verification Failed", {
-      description: "Please try again to claim your reward.",
-      duration: 3000,
     });
   };
 
@@ -81,13 +33,9 @@ const Index = () => {
             </div>
             <div className="flex items-center gap-2 bg-background/50 backdrop-blur-sm rounded-full px-3 py-1.5">
               <div className="w-5 h-5 rounded-full gradient-purple flex items-center justify-center">
-                <span className="text-xs font-bold text-primary-foreground">
-                  {wallet ? "🔗" : "⚠️"}
-                </span>
+                <span className="text-xs font-bold text-primary-foreground">V</span>
               </div>
-              <span className="font-semibold text-foreground text-xs">
-                {wallet ? `${wallet.address.slice(0, 6)}...${wallet.address.slice(-4)}` : "No Wallet"}
-              </span>
+              <span className="font-semibold text-foreground">12.4</span>
             </div>
           </div>
           <button className="p-2 hover:bg-secondary/50 rounded-full transition-colors">
@@ -102,8 +50,8 @@ const Index = () => {
         <section className="bg-card/80 backdrop-blur-xl rounded-3xl p-5 lg:p-6 mb-6">
           <h2 className="text-xl font-bold text-foreground mb-4">Today's Mission</h2>
           <div className="space-y-4">
-            <div className="flex items-center gap-4 p-4 bg-card rounded-2xl">
-              <div className="flex-shrink-0">
+            <MissionCard
+              image={
                 <div className="w-16 h-16 rounded-xl overflow-hidden">
                   <img
                     src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200&auto=format&fit=crop"
@@ -111,40 +59,13 @@ const Index = () => {
                     className="w-full h-full object-cover"
                   />
                 </div>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-semibold text-foreground">Count 1,000 steps</h3>
-                  <div className="px-2 py-0.5 bg-blue-500/20 text-blue-600 text-xs rounded-full font-medium">
-                    🔐 DeCap
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground">Up to 50,000 credits daily - Bot protection enabled</p>
-              </div>
-              {wallet ? (
-                <DeCap
-                  mode="simple"
-                  userWallet={wallet}
-                  onSuccess={handleClaimSuccess}
-                  onFailure={handleClaimFailure}
-                  theme="auto"
-                >
-                  <button
-                    className="px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200 gradient-purple text-primary-foreground hover:opacity-90 disabled:opacity-50"
-                    disabled={isClaimingReward || isConnectingWallet}
-                  >
-                    {isConnectingWallet ? "Connecting..." : isClaimingReward ? "Claiming..." : "Earn 50,000"}
-                  </button>
-                </DeCap>
-              ) : (
-                <button
-                  className="px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200 bg-gray-400 text-white opacity-50 cursor-not-allowed"
-                  disabled
-                >
-                  {isConnectingWallet ? "Connecting Wallet..." : "Wallet Required"}
-                </button>
-              )}
-            </div>
+              }
+              title="Count 1,000 steps"
+              description="Up to 50,000 credits daily - Ready for DeCap integration"
+              buttonText="Earn 50,000"
+              buttonVariant="primary"
+              onClick={handleClaimClick}
+            />
             <MissionCard
               image={
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/30 to-cyan/30 flex items-center justify-center border-4 border-primary/20">
@@ -206,4 +127,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default IndexSimple;

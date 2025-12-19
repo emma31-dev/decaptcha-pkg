@@ -55,9 +55,9 @@ const ThemeSelector = ({ currentTheme, onThemeChange }: {
   <div style={{ 
     marginBottom: '20px', 
     padding: '15px', 
-    border: '1px solid var(--decap-border, #e1e5e9)', 
+    border: '1px solid var(--decap-color-text-secondary, #e1e5e9)', 
     borderRadius: '8px',
-    background: 'var(--decap-surface, #f8f9fa)',
+    background: 'var(--decap-color-surface, #f8f9fa)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -66,7 +66,7 @@ const ThemeSelector = ({ currentTheme, onThemeChange }: {
   }}>
     <label htmlFor="theme-select" style={{ 
       fontWeight: 'bold',
-      color: 'var(--decap-text, #333)',
+      color: 'var(--decap-color-text, #333)',
       fontSize: '14px'
     }}>
       🎨 Theme:
@@ -78,10 +78,10 @@ const ThemeSelector = ({ currentTheme, onThemeChange }: {
       style={{ 
         padding: '8px 12px', 
         borderRadius: '6px', 
-        border: '1px solid var(--decap-border, #ccc)',
+        border: '1px solid var(--decap-color-text-secondary, #ccc)',
         fontSize: '14px',
-        background: 'var(--decap-background, white)',
-        color: 'var(--decap-text, #333)',
+        background: 'var(--decap-color-background, white)',
+        color: 'var(--decap-color-text, #333)',
         cursor: 'pointer'
       }}
     >
@@ -91,8 +91,8 @@ const ThemeSelector = ({ currentTheme, onThemeChange }: {
     </select>
     <span style={{ 
       fontSize: '12px', 
-      color: 'var(--decap-text-secondary, #666)',
-      background: 'var(--decap-primary-light, #e3f2fd)',
+      color: 'var(--decap-color-text-secondary, #666)',
+      background: 'var(--decap-color-surface, #e3f2fd)',
       padding: '4px 8px',
       borderRadius: '4px'
     }}>
@@ -136,18 +136,18 @@ const TestApp = () => {
       <div className="test-container" style={{ 
         padding: '40px', 
         fontFamily: 'Arial, sans-serif',
-        background: 'var(--decap-background, white)',
-        color: 'var(--decap-text, #333)',
+        background: 'var(--decap-color-background, white)',
+        color: 'var(--decap-color-text, #333)',
         borderRadius: '16px',
         boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
         maxWidth: '600px',
         width: '100%',
         transition: 'all 0.3s ease'
       }}>
-        <h1 style={{ color: 'var(--decap-primary, #007AFF)', marginBottom: '10px' }}>
+        <h1 style={{ color: 'var(--decap-color-primary, #007AFF)', marginBottom: '10px' }}>
           🔐 DeCap SDK Theme Testing
         </h1>
-        <p style={{ color: 'var(--decap-text-secondary, #666)', marginBottom: '30px' }}>
+        <p style={{ color: 'var(--decap-color-text-secondary, #666)', marginBottom: '30px' }}>
           Test theme switching and component behavior
         </p>
         
@@ -157,36 +157,36 @@ const TestApp = () => {
         />
         
         <div className="wallet-info" style={{
-          background: 'var(--decap-surface, #f5f7fa)',
+          background: 'var(--decap-color-surface, #f5f7fa)',
           padding: '16px',
           borderRadius: '8px',
           margin: '20px 0',
           fontSize: '14px',
-          color: 'var(--decap-text-secondary, #666)',
-          border: '1px solid var(--decap-border, #e1e5e9)'
+          color: 'var(--decap-color-text-secondary, #666)',
+          border: '1px solid var(--decap-color-text-secondary, #e1e5e9)'
         }}>
           <strong>Mock Wallet:</strong> 0x1234...5678<br />
           <small>This is a simulated wallet for testing purposes</small>
         </div>
         
         <div style={{ marginBottom: '20px' }}>
-          <h2 style={{ color: 'var(--decap-text, #333)', fontSize: '18px' }}>Simple Mode Test</h2>
+          <h2 style={{ color: 'var(--decap-color-text, #333)', fontSize: '18px' }}>Simple Mode Test</h2>
           <SimpleTest />
         </div>
         
         <div style={{ marginBottom: '20px' }}>
-          <h2 style={{ color: 'var(--decap-text, #333)', fontSize: '18px' }}>Advanced Mode Test</h2>
+          <h2 style={{ color: 'var(--decap-color-text, #333)', fontSize: '18px' }}>Advanced Mode Test</h2>
           <AdvancedTest />
         </div>
         
         <div style={{ marginTop: '30px' }}>
-          <h3 style={{ color: 'var(--decap-text, #333)', fontSize: '16px' }}>Result:</h3>
+          <h3 style={{ color: 'var(--decap-color-text, #333)', fontSize: '16px' }}>Result:</h3>
           <pre id="result" className="result" style={{ 
             padding: '16px', 
-            border: '1px solid var(--decap-border, #e1e5e9)', 
+            border: '1px solid var(--decap-color-text-secondary, #e1e5e9)', 
             borderRadius: '8px',
-            background: 'var(--decap-surface, #f5f5f5)',
-            color: 'var(--decap-text, #333)',
+            background: 'var(--decap-color-surface, #f5f5f5)',
+            color: 'var(--decap-color-text, #333)',
             minHeight: '100px',
             whiteSpace: 'pre-wrap',
             fontFamily: 'monospace',

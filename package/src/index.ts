@@ -19,26 +19,62 @@ export type {
   ChallengeData,
   VerificationState,
   ReputationData,
-  OrangeProtocolInput,
-  OrangeProtocolOutput
+  WalletData,
+  RiskFlag,
+  ScoringWeights,
+  ReputationConfig,
+  CustomScoringAPI
 } from './types';
 
 // Utility exports
 export { verifySignature } from './lib/signature';
 export { generateChallenge } from './lib/challenge';
-export { fetchWalletReputation } from './lib/reputation';
+export { 
+  fetchWalletReputation, 
+  normalizeScore, 
+  clearReputationCache, 
+  getCaptchaMode 
+} from './lib/reputation';
 
-// Orange Protocol utilities
+// Reputation Utilities for Developers (Main Integration Functions)
+export {
+  fetchWalletReputation as fetchReputationScore,
+  batchFetchWalletReputation,
+  createReputationFetcher,
+  clearReputationCache as clearCache,
+  getCachedReputation,
+  getCaptchaModeFromScore,
+  getTrustLevelFromScore
+} from './utils/reputationUtils';
+export type { ReputationResult, ReputationFetchOptions } from './utils/reputationUtils';
+
+// Custom Reputation Scoring (Primary Export)
 export { 
-  orangeProtocolAPI, 
-  fetchOrangeReputationScore, 
-  createSampleOrangeInput 
-} from './utils/orangeProtocol';
+  calculateWalletReputation,
+  calculateScore,
+  generateMockWalletData,
+  determineCaptchaMode,
+  getTrustLevel,
+  batchCalculateReputation,
+  generateFallbackScore,
+  customScoringAPI,
+  DEFAULT_CONFIG,
+  DEFAULT_WEIGHTS,
+  KNOWN_PROTOCOLS
+} from './lib/customScoring';
+
+// Orange Protocol utilities removed - use custom scoring instead
+
+// Blockchain Data Utilities
 export { 
-  fetchOrangeScore, 
-  validateOrangeInput, 
-  createOrangeInput 
-} from './utils/fetchOrangeScore';
+  EtherscanAPI,
+  fetchRealWalletData,
+  analyzeRiskFlags,
+  detectProtocolInteractions,
+  calculateWalletAge,
+  countAssets,
+  defaultEtherscanAPI
+} from './utils/etherscanApi';
 
 // UUID utilities
 export { 

@@ -9,6 +9,7 @@ export interface DeCapProps {
   children: React.ReactNode;
   theme?: 'light' | 'dark' | 'auto';
   useTheme?: () => 'light' | 'dark'; // Hook from dapp for auto theme detection
+  reputationScore?: number; // Optional: Pre-calculated reputation score (0-100) from developer's atom
 }
 
 export interface WalletConnection {
@@ -79,7 +80,7 @@ export interface ReputationData {
 }
 
 export interface ReputationSourceResult {
-  source: 'orange' | 'gitcoin' | 'lens' | 'manual';
+  source: 'custom' | 'etherscan' | 'alchemy' | 'fallback';
   rawScore: any;
   normalizedScore: number;
   weight: number;
@@ -87,30 +88,43 @@ export interface ReputationSourceResult {
   error?: string;
 }
 
-// Orange Protocol specific types
-export interface OrangeProtocolInput {
-  result: {
-    snsInfos: Array<{
-      snsType: 'Discord' | 'Google' | 'Telegram' | 'Twitter';
-      snsId: string;
-      userName: string;
-      joinedTime?: number;
-      followerCount?: number;
-      TweetsCount?: number;
-    }>;
-    pohInfos: Array<{
-      pohType: string;
-    }>;
-    ensInfos: string[]; // Array of ENS names matching pattern ^[a-zA-Z0-9]+\.eth$
-  };
+// Custom Scoring System Types
+export interface WalletData {
+  address: string;
+  transactionCount: number;
+  contractInteractions: number;
+  knownProtocolInteractions: string[];
+  walletAge: number; // in days
+  tokenCount: number;
+  nftCount: number;
+  riskFlags: RiskFlag[];
+  lastActivity: number; // timestamp
 }
 
-export interface OrangeProtocolOutput extends OrangeProtocolInput {
-  reputationScore?: number;
+export interface RiskFlag {
+  type: 'tornado_cash' | 'large_inflow' | 'large_outflow' | 'no_activity';
+  severity: number; // -10 to -30
+  description: string;
 }
 
-export interface OrangeProtocolAPI {
-  validateInput: (data: any) => boolean;
-  generateMockScore: (input: OrangeProtocolInput) => number;
-  processRequest: (input: OrangeProtocolInput) => Promise<OrangeProtocolOutput>;
+export interface ScoringWeights {
+  transactionActivity: number; // Max 30 points
+  contractInteractions: number; // Max 20 points
+  walletAge: number; // Max 20 points
+  tokenDiversity: number; // Max 10 points
+  riskFlags: number; // Negative points
 }
+
+export interface ReputationConfig {
+  easyThreshold: number; // Default: 40
+  bypassThreshold: number; // Default: 70
+  weights: ScoringWeights;
+}
+
+export interface CustomScoringAPI {
+  fetchWalletData: (address: string, useReal?: boolean, apiKey?: string) => Promise<WalletData>;
+  calculateScore: (data: WalletData) => number;
+  generateMockData: (address: string) => WalletData; // @deprecated
+}
+
+// Orange Protocol types removed - use custom scoring system instead

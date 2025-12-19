@@ -10,4 +10,9 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // Some dependencies reference `process.env` at runtime which breaks in the browser.
+  // Provide a safe empty object during the build/dev to avoid `process is not defined`.
+  define: {
+    'process.env': {},
+  },
 })

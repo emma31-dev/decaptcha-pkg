@@ -221,7 +221,7 @@ interface ReputationData {
 }
 
 interface ReputationSourceResult {
-  source: 'orange' | 'gitcoin' | 'lens' | 'manual';
+  source: 'custom' | 'etherscan' | 'alchemy' | 'fallback';
   rawScore: any;
   normalizedScore: number;
   weight: number;
@@ -373,163 +373,152 @@ interface DragDropHandlers {
 }
 ```
 
-### Onchain Reputation Integration
+### Custom Reputation Integration
 
-The auto mode leverages onchain reputation to adjust CAPTCHA difficulty or bypass verification entirely:
+The auto mode leverages custom onchain reputation scoring to adjust CAPTCHA difficulty or bypass verification entirely:
 
 #### Reputation Score Sources
-- **Orange Protocol**: Mock API implementation with JSON schema validation
-- **Gitcoin Passport**: REST API for identity verification
-- **Manual Scoring**: Wallet activity (tx count, age, balance) as fallback
-- **Lens Protocol**: Social graph reputation via contracts
+- **Custom Scoring Function**: Primary scoring based on onchain wallet activity
+- **Mock API**: Simulates blockchain data fetching for development/testing
+- **Etherscan API**: Real onchain data when available (transaction history, contract interactions)
+- **Fallback Scoring**: Hash-based deterministic scoring when APIs are unavailable
 
-#### Orange Protocol Mock API Schema
+#### Custom Reputation Scoring System
 
-**Input Schema:**
-```json
-{
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "type": "object",
-  "properties": {
-    "result": {
-      "type": "object",
-      "properties": {
-        "snsInfos": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "snsType": {
-                "type": "string",
-                "enum": ["Discord", "Google", "Telegram", "Twitter"]
-              },
-              "snsId": {
-                "type": "string"
-              },
-              "userName": {
-                "type": "string"
-              },
-              "joinedTime": {
-                "type": "integer",
-                "description": "Unix timestamp of when the user joined the platform"
-              },
-              "followerCount": {
-                "type": "integer"
-              },
-              "TweetsCount": {
-                "type": "integer"
-              }
-            },
-            "required": ["snsType", "snsId", "userName"],
-            "additionalProperties": false
-          }
-        },
-        "pohInfos": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "pohType": {
-                "type": "string"
-              }
-            },
-            "required": ["pohType"]
-          }
-        },
-        "ensInfos": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "pattern": "^[a-zA-Z0-9]+\\.eth$"
-          }
-        }
-      },
-      "required": ["snsInfos", "pohInfos", "ensInfos"]
-    }
-  },
-  "required": ["result"]
-}
+**Scoring Formula:**
+```
+Reputation Score = (Tx Activity Weight + Contract Interaction Weight + Age Weight + Diversity Weight) - Risk Flags
 ```
 
-**Output Schema:**
-The mock API returns the same structure as input but with calculated reputation scores based on the provided social network and proof-of-humanity data.
+**Weights Breakdown (0–100 total):**
+1. **Transaction Activity (0–30 points)**
+   - 0–10 txs: 5 pts
+   - 11–100 txs: 15 pts  
+   - 101+ txs: 30 pts
+
+2. **Contract Interactions (0–20 pts)**
+   - Has interacted with smart contracts: +10
+   - Interacted with known protocols (e.g., Uniswap): +10
+
+3. **Wallet Age (0–20 pts)**
+   - <1 month: 5 pts
+   - 1–6 months: 10 pts
+   - >6 months: 20 pts
+
+4. **Token/NFT Diversity (0–10 pts)**
+   - 1–2 assets: 2 pts
+   - 3–10: 6 pts
+   - >10: 10 pts
+
+5. **Risk Signals (−10 to −30)**
+   - Sudden large inflow/outflow: −10
+   - Tornado Cash-related: −30
+   - No activity at all: −20
+
+**Trust Categories:**
+- **Low Trust (<40)**: Fails CAPTCHA
+- **Medium Trust (40–70)**: Hard CAPTCHA  
+- **High Trust (70+)**: Simple/Skip CAPTCHA
 
 #### Implementation Logic
 ```typescript
 interface ReputationSystem {
-  fetchWalletReputation: (address: string) => Promise<number>;
+  calculateWalletReputation: (address: string) => Promise<number>;
   normalizeScore: (rawScore: any) => number; // Scale to 0-100
   adjustCaptchaLogic: (score: number) => CaptchaMode;
 }
 
-interface OrangeProtocolAPI {
-  fetchReputationScore: (input: OrangeProtocolInput) => Promise<OrangeProtocolOutput>;
-  validateSchema: (data: any) => boolean;
-  generateMockScore: (input: OrangeProtocolInput) => number;
+interface CustomScoringAPI {
+  fetchWalletData: (address: string) => Promise<WalletData>;
+  calculateScore: (data: WalletData) => number;
+  generateMockData: (address: string) => WalletData;
 }
 
 interface ReputationConfig {
-  easyThreshold: number; // Default: 50
+  easyThreshold: number; // Default: 40
   bypassThreshold: number; // Default: 70
-  sources: ReputationSource[];
+  weights: ScoringWeights;
 }
 
-interface ReputationSource {
-  name: 'orange' | 'gitcoin' | 'lens' | 'manual';
-  weight: number;
-  apiUrl?: string;
-  contractAddress?: string;
+interface ScoringWeights {
+  transactionActivity: number; // Max 30 points
+  contractInteractions: number; // Max 20 points
+  walletAge: number; // Max 20 points
+  tokenDiversity: number; // Max 10 points
+  riskFlags: number; // Negative points
 }
 
-interface OrangeProtocolInput {
-  result: {
-    snsInfos: Array<{
-      snsType: 'Discord' | 'Google' | 'Telegram' | 'Twitter';
-      snsId: string;
-      userName: string;
-      joinedTime?: number;
-      followerCount?: number;
-      TweetsCount?: number;
-    }>;
-    pohInfos: Array<{
-      pohType: string;
-    }>;
-    ensInfos: string[]; // Array of ENS names matching pattern ^[a-zA-Z0-9]+\.eth$
-  };
+interface WalletData {
+  address: string;
+  transactionCount: number;
+  contractInteractions: number;
+  knownProtocolInteractions: string[];
+  walletAge: number; // in days
+  tokenCount: number;
+  nftCount: number;
+  riskFlags: RiskFlag[];
+  lastActivity: number; // timestamp
 }
 
-interface OrangeProtocolOutput extends OrangeProtocolInput {
-  // Same structure as input, but processed by mock API
-  // Mock API will generate random reputation score based on input data
-}
-
-interface OrangeProtocolMockAPI {
-  validateInput: (data: any) => boolean;
-  generateMockScore: (input: OrangeProtocolInput) => number;
-  processRequest: (input: OrangeProtocolInput) => Promise<OrangeProtocolOutput>;
+interface RiskFlag {
+  type: 'tornado_cash' | 'large_inflow' | 'large_outflow' | 'no_activity';
+  severity: number; // -10 to -30
+  description: string;
 }
 
 // Example implementation
-async function getReputationScore(walletAddress: string): Promise<number> {
-  const score = await fetchGitcoinPassportScore(walletAddress);
-  return normalizeScore(score); // e.g., 0.83 -> 83
+async function calculateWalletReputation(walletAddress: string): Promise<number> {
+  const walletData = await fetchWalletData(walletAddress);
+  return calculateScore(walletData);
+}
+
+function calculateScore(data: WalletData): number {
+  let score = 0;
+  
+  // Transaction Activity (0-30 points)
+  if (data.transactionCount >= 101) score += 30;
+  else if (data.transactionCount >= 11) score += 15;
+  else if (data.transactionCount > 0) score += 5;
+  
+  // Contract Interactions (0-20 points)
+  if (data.contractInteractions > 0) score += 10;
+  if (data.knownProtocolInteractions.length > 0) score += 10;
+  
+  // Wallet Age (0-20 points)
+  const ageInMonths = data.walletAge / 30;
+  if (ageInMonths >= 6) score += 20;
+  else if (ageInMonths >= 1) score += 10;
+  else score += 5;
+  
+  // Token/NFT Diversity (0-10 points)
+  const totalAssets = data.tokenCount + data.nftCount;
+  if (totalAssets > 10) score += 10;
+  else if (totalAssets >= 3) score += 6;
+  else if (totalAssets >= 1) score += 2;
+  
+  // Apply risk flags
+  data.riskFlags.forEach(flag => {
+    score += flag.severity; // Negative values
+  });
+  
+  return Math.max(0, Math.min(100, score));
 }
 
 function determineCaptchaMode(score: number): CaptchaMode {
-  if (score > 70) return 'bypass'; // No CAPTCHA needed
-  if (score > 50) return 'easy';   // Simplified challenge
-  return 'full';                   // Full validation required
+  if (score >= 70) return 'bypass'; // No CAPTCHA needed
+  if (score >= 40) return 'simple';   // Simplified challenge
+  return 'advanced';                   // Full validation required
 }
 ```
 
 #### Auto Mode Flow
 1. **Fetch Wallet Address**: From wallet connection
-2. **Query Reputation APIs/Contracts**: Multiple sources for reliability
-3. **Normalize Score**: Scale to 0-100 range
+2. **Calculate Custom Reputation Score**: Using onchain activity analysis
+3. **Apply Scoring Formula**: Transaction activity + contract interactions + age + diversity - risk flags
 4. **Adjust CAPTCHA Logic**:
-   - Score > 70: Skip CAPTCHA entirely
-   - Score > 50: Show easier challenge
-   - Score < 50: Require full validation
+   - Score ≥ 70: Skip CAPTCHA entirely (High Trust)
+   - Score 40-69: Show simple challenge (Medium Trust)
+   - Score < 40: Require full validation (Low Trust)
 
 ### Performance Considerations
 
@@ -564,28 +553,36 @@ function determineCaptchaMode(score: number): CaptchaMode {
 ├── /hooks
 │   ├── useCaptchaLogic.js
 │   └── useWalletReputation.js
+├── /lib
+│   ├── customScoring.ts (standalone reputation function)
+│   └── reputation.ts (reputation system integration)
 ├── /utils
 │   ├── verifySignature.js
-│   ├── fetchOrangeScore.js
-│   └── orangeProtocol.ts (mock implementation, easily replaceable with real API)
+│   ├── blockchainData.ts (Etherscan/Alchemy integration)
+│   └── mockApi.ts (mock blockchain data for testing)
 ├── /config
 │   └── decap.config.js (optional)
 └── index.js
 ```
 
-### Orange Protocol Implementation Strategy
+### Custom Scoring Implementation Strategy
 
-The Orange Protocol integration is implemented in a separate `orangeProtocol.ts` file to enable easy transition from mock to real API:
+The custom reputation scoring is implemented as an importable function that developers can use independently:
 
-- **Mock Phase**: `orangeProtocol.ts` contains mock API implementation with schema validation
-- **Production Phase**: Replace `orangeProtocol.ts` with real Orange Protocol API calls
-- **Interface Consistency**: Same TypeScript interfaces used for both mock and real implementations
+- **Standalone Function**: `calculateWalletReputation()` can be imported and used in any dapp
+- **Mock Phase**: Uses mock blockchain data for development and testing
+- **Production Phase**: Integrates with Etherscan API or Alchemy SDK for real onchain data
+- **Atom Integration**: Designed to work as a state atom in React applications for reactive reputation updates
 
 ## Usage Example
 
 ```typescript
-import { DeCap } from "decap-sdk"
+import { DeCap, calculateWalletReputation } from "decap-sdk"
 
+// Use as standalone function (atom integration)
+const reputationScore = await calculateWalletReputation(walletAddress);
+
+// Use in component
 function TransferButton() {
   return (
     <DeCap 
@@ -599,4 +596,19 @@ function TransferButton() {
     </DeCap>
   )
 }
+
+// Custom scoring configuration
+const customConfig = {
+  weights: {
+    transactionActivity: 30,
+    contractInteractions: 20,
+    walletAge: 20,
+    tokenDiversity: 10,
+    riskFlags: -30
+  },
+  thresholds: {
+    lowTrust: 40,
+    highTrust: 70
+  }
+};
 ```

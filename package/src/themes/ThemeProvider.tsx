@@ -5,7 +5,7 @@
  * for consistent theming across all components.
  */
 
-import React, { createContext, useContext, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { Theme, lightTheme, darkTheme, generateThemeCSS } from './index';
 
 export interface ThemeContextValue {
@@ -24,25 +24,53 @@ export interface ThemeProviderProps {
   defaultTheme?: 'light' | 'dark';
 }
 
+/**
+ * Hook to detect system theme preference
+ */
+const useSystemTheme = (): 'light' | 'dark' => {
+  const [systemTheme, setSystemTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    return 'light';
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => {
+      setSystemTheme(e.matches ? 'dark' : 'light');
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
+  return systemTheme;
+};
+
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   children,
   theme = 'light',
   useTheme,
   defaultTheme = 'light'
 }) => {
+  const systemTheme = useSystemTheme();
+  
   // Determine current theme
   const currentThemeName = useMemo(() => {
-    if (theme === 'auto' && useTheme) {
-      return useTheme();
+    if (theme === 'auto') {
+      return useTheme ? useTheme() : systemTheme;
     }
-    return theme === 'auto' ? defaultTheme : theme;
-  }, [theme, useTheme, defaultTheme]);
+    return theme;
+  }, [theme, useTheme, systemTheme]);
   
   const currentTheme = useMemo(() => {
     return currentThemeName === 'dark' ? darkTheme : lightTheme;
   }, [currentThemeName]);
   
-  // Inject CSS custom properties
+  // Inject CSS custom properties and theme data attribute
   useEffect(() => {
     const styleId = 'decap-theme-variables';
     let styleElement = document.getElementById(styleId) as HTMLStyleElement;
@@ -56,14 +84,22 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     const cssVariables = generateThemeCSS(currentTheme);
     styleElement.textContent = `:root { ${cssVariables} }`;
     
+    // Set theme data attribute on document element
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute('data-decap-theme', currentThemeName);
+    }
+    
     return () => {
       // Cleanup on unmount
       const element = document.getElementById(styleId);
       if (element) {
         element.remove();
       }
+      if (typeof document !== 'undefined') {
+        document.documentElement.removeAttribute('data-decap-theme');
+      }
     };
-  }, [currentTheme]);
+  }, [currentTheme, currentThemeName]);
   
   const contextValue: ThemeContextValue = useMemo(() => ({
     theme: currentTheme,

@@ -18,30 +18,33 @@
   - Implement secure message generation for wallet signing using ethers utils
   - _Requirements: 2.3, 2.4_
 
-- [x] 2.2 Implement Orange Protocol mock API in separate module
+- [x] 2.2 Implement custom reputation scoring function in separate module
 
 
-
-  - Create /utils/orangeProtocol.ts with mock Orange Protocol API implementation
-  - Add JSON schema validation for Orange Protocol input/output format according to provided schemas
-  - Implement mock API that generates random reputation scores (0-100) based on input data
-  - Create score calculation logic based on social network data (follower count, account age, ENS domains)
-  - Add proper TypeScript interfaces for Orange Protocol data structures
-  - Design module for easy replacement with real Orange Protocol API later
+  - Create /lib/customScoring.ts with standalone reputation calculation function
+  - Implement scoring formula: (Tx Activity + Contract Interaction + Age + Diversity) - Risk Flags
+  - Add mock blockchain data generation for development and testing
+  - Create TypeScript interfaces for WalletData, ScoringWeights, and RiskFlag types
+  - Design function to be importable and usable as an atom in dapps
+  - Add proper error handling and fallback scoring mechanisms
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
 
 
-- [ ] 2.3 Update fetchOrangeScore.js to use orangeProtocol module
-  - Modify /utils/fetchOrangeScore.js to import and use orangeProtocol.ts
-  - Add error handling and fallback logic for API failures
-  - Implement integration with existing reputation system
+
+- [ ] 2.3 Update reputation system to use custom scoring
+  - Modify /lib/reputation.ts to use custom scoring function instead of Orange Protocol
+  - Replace Orange Protocol integration with custom wallet analysis
+  - Update scoring thresholds: Low Trust (<40), Medium Trust (40-70), High Trust (70+)
+
+
+  - Add integration with mock API for blockchain data simulation
   - _Requirements: 5.1, 5.5_
 
-- [ ] 2.4 Create additional reputation source integrations
-  - Add Gitcoin Passport REST API integration in fetchOrangeScore.js
-  - Implement Lens Protocol contract integration via ethers.js
-  - Create manual scoring fallback using wallet activity (tx count, age, balance)
-  - Add reputation source weighting and aggregation logic
+- [ ] 2.4 Create blockchain data fetching utilities
+  - Add Etherscan API integration for real transaction data fetching
+  - Implement Alchemy SDK integration for contract interaction analysis
+  - Create fallback hash-based scoring when APIs are unavailable
+  - Add known protocol detection (Uniswap, Aave, etc.) for bonus scoring
   - _Requirements: 4.4, 3.2_
 
 
@@ -56,16 +59,19 @@
 
 
 
+
+
+
   - Integrate wallet signing functionality with ethers.js
   - _Requirements: 1.1, 1.4, 2.1, 2.2, 2.3, 2.4_
 
-- [ ] 3.2 Implement useWalletReputation hook
-  - Create /hooks/useWalletReputation.js for reputation system integration
-  - Add auto mode logic that queries reputation system using fetchOrangeScore utility
+- [ ] 3.2 Update useWalletReputation hook for custom scoring
+  - Update /hooks/useWalletReputation.ts to use custom scoring function
+  - Add auto mode logic that queries custom reputation system
   - Implement reputation-based challenge difficulty determination
-  - Add CAPTCHA difficulty adjustment logic (bypass >70, easy >50, full <50)
-  - Create reputation caching system with expiry to avoid repeated API calls
-  - Add fallback logic when reputation services are unavailable
+  - Update CAPTCHA difficulty thresholds (bypass ≥70, simple 40-69, advanced <40)
+  - Create reputation caching system with expiry to avoid repeated calculations
+  - Add fallback logic when blockchain data is unavailable
   - _Requirements: 3.2, 4.4_
 
 - [ ] 4. Implement DeCap main component
@@ -176,5 +182,6 @@
   - Set up package.json with proper exports and PNPM configuration
   - Configure tsup build for library distribution with TypeScript support
   - Add proper type definitions export and ethers.js peer dependencies
-  - Create README with usage examples, ethers.js integration, and config setup
-  - _Requirements: 3.4, 3.5_
+  - Export calculateWalletReputation function as standalone import for atom usage
+  - Create README with usage examples, custom scoring integration, and config setup
+  - _Requirements: 3.4, 3.5, 5.1_

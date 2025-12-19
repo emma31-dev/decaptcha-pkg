@@ -1,11 +1,14 @@
-// Reputation system utilities with Orange Protocol integration and caching
-import { ReputationData, ReputationSourceResult } from '../types';
-import { fetchOrangeScore } from '../utils/fetchOrangeScore.js';
+// Reputation system utilities with Custom Scoring integration and caching
+import { ReputationData, ReputationSourceResult, ReputationConfig } from '../types';
+import { calculateWalletReputation, generateFallbackScore, DEFAULT_CONFIG } from './customScoring';
 
 // In-memory cache for reputation scores
 const reputationCache = new Map<string, ReputationData>();
 
-export const fetchWalletReputation = async (walletAddress: string): Promise<ReputationData> => {
+export const fetchWalletReputation = async (
+  walletAddress: string, 
+  config: ReputationConfig = DEFAULT_CONFIG
+): Promise<ReputationData> => {
   // Check cache first
   const cached = reputationCache.get(walletAddress);
   if (cached && Date.now() < cached.cacheExpiry) {
@@ -16,15 +19,15 @@ export const fetchWalletReputation = async (walletAddress: string): Promise<Repu
   let totalScore = 0;
   let totalWeight = 0;
 
-  // Fetch Orange Protocol score
+  // Fetch Custom Scoring reputation
   try {
-    const orangeScore = await fetchOrangeScore(walletAddress);
-    const normalizedScore = normalizeScore(orangeScore);
-    const weight = 0.4;
+    const customScore = await calculateWalletReputation(walletAddress, config); // Use real blockchain data
+    const normalizedScore = normalizeScore(customScore);
+    const weight = 1.0; // Primary source gets full weight
     
     sources.push({
-      source: 'orange',
-      rawScore: orangeScore,
+      source: 'custom',
+      rawScore: customScore,
       normalizedScore,
       weight,
       success: true
@@ -33,14 +36,24 @@ export const fetchWalletReputation = async (walletAddress: string): Promise<Repu
     totalScore += normalizedScore * weight;
     totalWeight += weight;
   } catch (error) {
+    console.error('Custom scoring failed, using fallback:', error);
+    
+    // Use fallback scoring
+    const fallbackScore = generateFallbackScore(walletAddress);
+    const normalizedScore = normalizeScore(fallbackScore);
+    const weight = 0.5; // Reduced weight for fallback
+    
     sources.push({
-      source: 'orange',
-      rawScore: null,
-      normalizedScore: 0,
-      weight: 0.4,
+      source: 'fallback',
+      rawScore: fallbackScore,
+      normalizedScore,
+      weight,
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error'
     });
+    
+    totalScore += normalizedScore * weight;
+    totalWeight += weight;
   }
 
   // Calculate final weighted score
@@ -79,4 +92,18 @@ export const normalizeScore = (rawScore: any): number => {
 // Clear cache utility
 export const clearReputationCache = (): void => {
   reputationCache.clear();
+};
+
+// Utility to get trust level from score
+export const getTrustLevel = (score: number): 'low' | 'medium' | 'high' => {
+  if (score >= 70) return 'high';
+  if (score >= 40) return 'medium';
+  return 'low';
+};
+
+// Utility to determine CAPTCHA mode from score
+export const getCaptchaMode = (score: number, config: ReputationConfig = DEFAULT_CONFIG): 'bypass' | 'simple' | 'advanced' => {
+  if (score >= config.bypassThreshold) return 'bypass';
+  if (score >= config.easyThreshold) return 'simple';
+  return 'advanced';
 };

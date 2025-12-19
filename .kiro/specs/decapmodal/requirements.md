@@ -64,12 +64,12 @@ The DecapModal is a React component that provides a decentralized captcha verifi
 
 ### Requirement 5
 
-**User Story:** As a developer, I want to integrate Orange Protocol reputation scoring with a mock API, so that I can test reputation-based verification flows without relying on external services.
+**User Story:** As a developer, I want to integrate a custom reputation scoring system that can be imported as a function, so that I can evaluate wallet trustworthiness based on onchain activity and use it as an atom in my dapp.
 
 #### Acceptance Criteria
 
-1. THE DecapModal SHALL implement a mock Orange Protocol API that accepts user social network and proof-of-humanity data
-2. WHEN the mock API receives a request, THE DecapModal SHALL validate the input against the Orange Protocol JSON schema
-3. THE DecapModal SHALL generate random reputation scores between 0-100 for testing purposes
-4. THE DecapModal SHALL return reputation data in the specified Orange Protocol output format
-5. THE DecapModal SHALL handle API failures gracefully and provide fallback scoring mechanisms
+1. THE DecapModal SHALL provide a custom reputation scoring function that developers can import and use independently
+2. WHEN the scoring function receives a wallet address, THE DecapModal SHALL calculate reputation based on transaction activity, contract interactions, wallet age, and token diversity
+3. THE DecapModal SHALL implement the scoring formula: (Tx Activity Weight + Contract Interaction Weight + Age Weight + Diversity Weight) - Risk Flags
+4. THE DecapModal SHALL normalize scores to 0-100 range and categorize as Low Trust (<40), Medium Trust (40-70), or High Trust (70+)
+5. THE DecapModal SHALL use mock API data to simulate onchain analysis when real blockchain data is unavailable
