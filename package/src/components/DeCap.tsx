@@ -32,6 +32,19 @@ export const DeCap: React.FC<DeCapProps> = ({
   const [walletSignature, setWalletSignature] = useState<string | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if screen is mobile on mount and resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 480);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Determine actual mode based on reputation score when mode is 'auto'
   const actualMode = useMemo(() => {
@@ -445,7 +458,9 @@ export const DeCap: React.FC<DeCapProps> = ({
                     <div 
                       className="decap-slider-track"
                       style={{
-                        width: `${(challenge.content.targetWord.length * 48) + ((challenge.content.targetWord.length - 1) * 12)}px`
+                        width: isMobile 
+                          ? '100%' 
+                          : `${(challenge.content.targetWord.length * 48) + ((challenge.content.targetWord.length - 1) * 12)}px`
                       }}
                     >
                       {/* Letter above slider */}

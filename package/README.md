@@ -2,7 +2,7 @@
 
 **Decentralized CAPTCHA for Web3 Applications**
 
-A React component that provides intelligent CAPTCHA verification based on wallet reputation. High-reputation wallets skip verification entirely, while new wallets complete simple puzzles.
+A React component that provides intelligent CAPTCHA verification based on wallet reputation. High-reputation wallets skip verification entirely, while new wallets complete simple puzzles or advanced verification with wallet signatures.
 
 ## Installation
 
@@ -16,6 +16,9 @@ yarn add decap-sdk
 
 ## Quick Start
 
+### Simple Mode
+Perfect for basic bot protection without wallet requirements:
+
 ```typescript
 import { DeCap } from 'decap-sdk';
 
@@ -28,7 +31,6 @@ function App() {
   return (
     <DeCap
       mode="simple"
-      userWallet={wallet}
       onSuccess={handleSuccess}
       onFailure={() => console.log('Verification failed')}
     >
@@ -38,13 +40,95 @@ function App() {
 }
 ```
 
-## Smart Verification
+### Advanced Mode
+Enhanced security with wallet signature verification:
+
+```typescript
+import { DeCap } from 'decap-sdk';
+
+function AdvancedProtection() {
+  const handleSuccess = (proof) => {
+    console.log('Verification successful:', proof);
+    console.log('Wallet signature:', proof.walletSignature);
+    // Verify signature on your backend for maximum security
+  };
+
+  return (
+    <DeCap
+      mode="advanced"
+      userWallet={wallet}
+      onSuccess={handleSuccess}
+      onFailure={() => console.log('Verification failed')}
+    >
+      <button>High-Security Action</button>
+    </DeCap>
+  );
+}
+```
+
+## Verification Modes
+
+### 1. Simple Mode (`mode="simple"`)
+- **Use case**: Basic bot protection, public actions
+- **Requirements**: None (no wallet needed)
+- **Process**: Interactive puzzle only
+- **Security**: Medium - prevents automated bots
+
+```typescript
+<DeCap
+  mode="simple"
+  onSuccess={handleSuccess}
+  onFailure={handleFailure}
+>
+  <button>Join Waitlist</button>
+</DeCap>
+```
+
+### 2. Advanced Mode (`mode="advanced"`)
+- **Use case**: High-value transactions, sensitive operations
+- **Requirements**: Connected wallet
+- **Process**: Interactive puzzle + wallet signature
+- **Security**: High - cryptographic proof of ownership
+
+```typescript
+<DeCap
+  mode="advanced"
+  userWallet={wallet}
+  onSuccess={(proof) => {
+    // proof.walletSignature contains the cryptographic signature
+    submitTransaction(proof.walletSignature);
+  }}
+  onFailure={handleFailure}
+>
+  <button>Execute Trade</button>
+</DeCap>
+```
+
+### 3. Auto Mode (`mode="auto"`)
+- **Use case**: Adaptive security based on user reputation
+- **Requirements**: Wallet connection for reputation scoring
+- **Process**: Automatically selects verification level
+- **Security**: Dynamic - scales with user trustworthiness
+
+```typescript
+<DeCap
+  mode="auto"
+  userWallet={wallet}
+  reputationScore={userReputation}
+  onSuccess={handleSuccess}
+  onFailure={handleFailure}
+>
+  <button>Smart Action</button>
+</DeCap>
+```
+
+## Smart Verification with Auto Mode
 
 DeCap automatically adjusts verification based on wallet reputation:
 
-- **High reputation (70-100)**: Skip verification entirely
-- **Medium reputation (40-69)**: Simple puzzle
-- **Low reputation (0-39)**: Puzzle + wallet signature
+- **High reputation (70-100)**: Skip verification entirely ✨
+- **Medium reputation (40-69)**: Simple puzzle only 🧩
+- **Low reputation (0-39)**: Puzzle + wallet signature 🔐
 
 ```typescript
 import { DeCap, fetchReputationScore } from 'decap-sdk';
@@ -71,11 +155,63 @@ function SmartVerification() {
 }
 ```
 
+## Advanced Mode Security Features
+
+### Wallet Signature Verification
+Advanced mode generates a unique nonce message that users must sign:
+
+```typescript
+// Example signature message format:
+// DeCap Verification
+// Nonce: 550e8400-e29b-41d4-a716-446655440000
+// Challenge: challenge_abc123
+// Timestamp: 1703875200000
+```
+
+### Backend Verification
+For maximum security, verify signatures on your backend:
+
+```typescript
+// Frontend
+const handleSuccess = (proof) => {
+  fetch('/api/verify-decap', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      signature: proof.walletSignature,
+      address: wallet.address,
+      challengeId: proof.challengeId,
+      timestamp: proof.timestamp
+    })
+  });
+};
+
+// Backend (Node.js example)
+import { ethers } from 'ethers';
+
+app.post('/api/verify-decap', (req, res) => {
+  const { signature, address, challengeId, timestamp } = req.body;
+  
+  // Reconstruct the original message
+  const message = `DeCap Verification\nNonce: ${challengeId}\nTimestamp: ${timestamp}`;
+  
+  // Verify signature
+  const recoveredAddress = ethers.utils.verifyMessage(message, signature);
+  
+  if (recoveredAddress.toLowerCase() === address.toLowerCase()) {
+    // Signature is valid, proceed with protected action
+    res.json({ success: true });
+  } else {
+    res.status(400).json({ error: 'Invalid signature' });
+  }
+});
+```
+
 ## Configuration
 
 ### Environment Setup
 
-For reputation scoring, add your Etherscan API key:
+For reputation scoring in auto mode, add your Etherscan API key:
 
 ```env
 ETHERSCAN_API_KEY=your_api_key_here
@@ -88,13 +224,23 @@ Get a free API key at [etherscan.io/](https://etherscan.io/)
 ```typescript
 interface DeCapProps {
   mode: 'simple' | 'advanced' | 'auto';
-  userWallet: WalletConnection;
+  userWallet?: WalletConnection; // Optional for simple mode
   onSuccess: (proof: VerificationProof) => void;
   onFailure: () => void;
   children: React.ReactNode;
   className?: string;
   theme?: 'light' | 'dark' | 'auto';
-  reputationScore?: number;
+  reputationScore?: number; // For auto mode
+}
+
+interface VerificationProof {
+  success: boolean;
+  puzzleCompleted: boolean;
+  walletSignature?: string; // Only present in advanced mode
+  token: string;
+  timestamp: number;
+  challengeId: string;
+  mode: 'simple' | 'advanced' | 'auto';
 }
 ```
 
@@ -110,6 +256,27 @@ interface WalletConnection {
 
 Compatible with MetaMask, WalletConnect, Coinbase Wallet, and any ethers.js wallet.
 
+## Use Cases by Mode
+
+### Simple Mode Examples
+- Newsletter signups
+- Public content access
+- Basic form submissions
+- Community features
+
+### Advanced Mode Examples
+- Financial transactions
+- NFT minting/trading
+- Governance voting
+- Account modifications
+- High-value operations
+
+### Auto Mode Examples
+- DeFi protocols
+- Social platforms
+- Gaming applications
+- Multi-tier access systems
+
 ## Themes
 
 ```typescript
@@ -121,10 +288,12 @@ Compatible with MetaMask, WalletConnect, Coinbase Wallet, and any ethers.js wall
 ## Examples
 
 Check the `/demo` folder for complete examples:
-- Basic integration
-- Reputation-based verification
+- Basic integration (simple mode)
+- Advanced security (advanced mode)
+- Reputation-based verification (auto mode)
 - State management integration
 - Custom scoring
+- Backend signature verification
 
 ## Documentation
 
@@ -135,3 +304,5 @@ Check the `/demo` folder for complete examples:
 ## License
 
 MIT License - see LICENSE file for details.
+
+Contribute on [GitHub](https://github.com/emma31-dev/decaptcha-pkg).

@@ -234,6 +234,14 @@
   margin: 16px 0;
 }
 
+@media (max-width: 480px) {
+  .decap-word-display {
+    width: 80vw;
+    justify-content: center;
+    margin: 16px auto;
+  }
+}
+
 .decap-letter-slot {
   width: 48px;
   height: 48px;
@@ -315,6 +323,13 @@
   padding-top: 50px; /* Reduced space for more compact layout */
 }
 
+@media (max-width: 480px) {
+  .decap-slider-container {
+    width: 80vw;
+    margin: 0 auto;
+  }
+}
+
 .decap-slider-track {
   height: 8px;
   background: linear-gradient(90deg, var(--decap-color-surface, #f0f0f0) 0%, var(--decap-color-text-secondary, #e0e0e0) 100%);
@@ -322,6 +337,12 @@
   position: relative;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) inset;
   margin: 0 auto;
+}
+
+@media (max-width: 480px) {
+  .decap-slider-track {
+    width: 100%;
+  }
 }
 
 .decap-slider-thumb {
@@ -757,7 +778,7 @@
   .decap-letter-slot {
     width: 35px;
     height: 35px;
-    font-size: 16px;
+    font-size: 18px;
   }
   
   .decap-letter-tile {
