@@ -2,7 +2,7 @@
 
 export interface DeCapProps {
   mode: 'simple' | 'advanced' | 'auto';
-  userWallet: WalletConnection;
+  userWallet?: WalletConnection; // Optional for simple mode
   onSuccess: (proof: VerificationProof) => void;
   onFailure: () => void;
   className?: string;

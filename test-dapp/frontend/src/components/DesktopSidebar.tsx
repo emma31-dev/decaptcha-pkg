@@ -37,8 +37,8 @@ export const DesktopSidebar = () => {
   return (
     <aside className="hidden lg:flex flex-col w-64 h-screen bg-card border-r border-border p-4 fixed left-0 top-0">
       <div className="flex items-center gap-3 px-4 py-4 mb-6">
-        <div className="w-10 h-10 rounded-full gradient-purple flex items-center justify-center">
-          <span className="text-lg font-bold text-primary-foreground">V</span>
+        <div className="w-10 h-10 flex items-center justify-center">
+          <img src="/src/assets/logo.svg" alt="VERY" className="w-8 h-8 object-contain flex-shrink-0" />
         </div>
         <span className="text-xl font-bold text-foreground">VeryChat</span>
       </div>
