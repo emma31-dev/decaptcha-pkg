@@ -1,5 +1,6 @@
 // DeCap main component
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { DeCapProps } from '../types';
 import { generateChallenge } from '../lib/challenge';
 import { ThemeProvider } from '../themes/ThemeProvider';
@@ -373,7 +374,7 @@ export const DeCap: React.FC<DeCapProps> = ({
         {children}
       </div>
       
-      {isModalOpen && (
+      {isModalOpen && createPortal(
         <div className={`decap-modal-overlay ${currentTheme} ${isClosing ? 'closing' : ''}`} data-theme={currentTheme}>
           <div className={`decap-modal ${currentTheme} ${isClosing ? 'closing' : ''}`} data-theme={currentTheme}>
             {/* Mobile Drawer Handle */}
@@ -391,6 +392,9 @@ export const DeCap: React.FC<DeCapProps> = ({
                 ))}
               </div>
             </div>
+
+            {/* Header Separator */}
+            <div className="decap-header-separator"></div>
 
             {/* Main Content Container */}
             <div className="decap-modal-content">
@@ -540,7 +544,8 @@ export const DeCap: React.FC<DeCapProps> = ({
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </ThemeProvider>
   );
