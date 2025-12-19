@@ -108,8 +108,8 @@ importers:
         specifier: ^3.6.0
         version: 3.6.0
       decap-sdk:
-        specifier: ^1.0.0
-        version: 1.0.0(ethers@6.16.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^1.0.3
+        version: 1.0.3(ethers@6.16.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       embla-carousel-react:
         specifier: ^8.6.0
         version: 8.6.0(react@18.3.1)
@@ -1786,8 +1786,8 @@ packages:
       supports-color:
         optional: true
 
-  decap-sdk@1.0.0:
-    resolution: {integrity: sha512-uxnQPgUTAz/fXEkd9VNwL/NU02zMa9pNLFB9wr6074/E2LnQ7vnKc+XuxhSFOBPV/N9f+8KsBLcQHPNtG9VKpg==}
+  decap-sdk@1.0.3:
+    resolution: {integrity: sha512-5XIeonv/Ascs6JJKYDV9zLUk/BadleL5k3yL+ICkCD4tn/we5ZzJA+q1hoiD/hPtxA53YVI6yyE1IK3+e6ngKw==}
     peerDependencies:
       ethers: ^6.0.0
       react: '>=16.8.0'
@@ -4017,7 +4017,7 @@ snapshots:
     dependencies:
       ms: 2.1.3
 
-  decap-sdk@1.0.0(ethers@6.16.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  decap-sdk@1.0.3(ethers@6.16.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       clsx: 2.1.1
       ethers: 6.16.0
