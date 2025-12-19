@@ -271,7 +271,15 @@ export const DeCap: React.FC<DeCapProps> = ({
           const v = c === 'x' ? r : (r & 0x3 | 0x8);
           return v.toString(16);
         });
-      const message = `DeCap Verification\nNonce: ${nonce}\nChallenge: ${challenge.id}\nTimestamp: ${Date.now()}`;
+      const message = `DeCap Security Verification
+
+Please sign this message to verify your identity.
+
+Nonce: ${nonce}
+Challenge: ${challenge.id}
+Timestamp: ${Date.now()}
+
+This signature will be used for security verification only.`;
       
       // Sign message with wallet
       const signature = await userWallet.signMessage(message);
@@ -516,8 +524,20 @@ export const DeCap: React.FC<DeCapProps> = ({
               <div className="decap-wallet-step">
                 <h2 className="decap-wallet-title">Sign Nonce Message</h2>
                 
-                <div className="decap-wallet-description">
-                  You will be prompted to sign a Nonce message with the wallet you are using for this transaction
+                <div className="flex items-center gap-2 justify-center">
+                  <div className="decap-wallet-description">
+                    You will be prompted to sign a Nonce message with the wallet you are using for this transaction
+                  </div>
+                  <div className="decap-info-icon-container">
+                    <div className="decap-info-icon">i</div>
+                    <div className="decap-info-tooltip">
+                      <div className="decap-info-tooltip-content">
+                        <h4>Why do I need to sign?</h4>
+                        <p>Signing proves you own this wallet without revealing your private key. It's like a digital signature that confirms your identity for this transaction.</p>
+                        <p><strong>Safe:</strong> Signing doesn't cost gas or move funds.</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 {walletSigned && (
