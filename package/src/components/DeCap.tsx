@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { DeCapProps } from '../types';
 import { generateChallenge } from '../lib/challenge';
 import { ThemeProvider } from '../themes/ThemeProvider';
+import { initializeConfig, getUIConfig, getSecurityConfig, isDebugMode } from '../utils/config';
 import './DeCap.css';
 
 export const DeCap: React.FC<DeCapProps> = ({
@@ -33,6 +34,17 @@ export const DeCap: React.FC<DeCapProps> = ({
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [configLoaded, setConfigLoaded] = useState(false);
+
+  // Initialize configuration
+  useEffect(() => {
+    initializeConfig().then(() => {
+      setConfigLoaded(true);
+      if (isDebugMode()) {
+        console.log('DeCap: Configuration loaded for component');
+      }
+    }).catch(console.error);
+  }, []);
 
   // Check if screen is mobile on mount and resize
   useEffect(() => {

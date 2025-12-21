@@ -83,3 +83,17 @@ export {
   generateSecureNonce, 
   isValidUUID 
 } from './utils/uuid';
+
+// Configuration utilities
+export { 
+  initializeConfig, 
+  getConfig, 
+  updateConfig,
+  getEtherscanConfig,
+  getReputationConfig,
+  getSecurityConfig,
+  getUIConfig,
+  getDevelopmentConfig,
+  isDebugMode,
+  shouldUseMockData
+} from './utils/config';

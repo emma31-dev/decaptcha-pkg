@@ -283,7 +283,7 @@
 .decap-letter-tile {
   width: 64px;
   height: 64px;
-  background: linear-gradient(135deg, var(--decap-color-text, #333) 0%, var(--decap-color-text-secondary, #555) 100%);
+  background: var(--decap-color-text, #333);
   color: var(--decap-color-background, white);
   border-radius: 16px;
   display: flex;
@@ -332,7 +332,7 @@
 
 .decap-slider-track {
   height: 8px;
-  background: linear-gradient(90deg, var(--decap-color-surface, #f0f0f0) 0%, var(--decap-color-text-secondary, #e0e0e0) 100%);
+  background: var(--decap-color-surface, #f0f0f0);
   border-radius: 4px;
   position: relative;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) inset;
@@ -369,7 +369,7 @@
   top: -6px; /* Center on 8px track */
   width: 20px;
   height: 20px;
-  background: linear-gradient(135deg, var(--decap-color-text, #333) 0%, var(--decap-color-text-secondary, #555) 100%);
+  background: var(--decap-color-text, #333);
   border-radius: 50%;
   box-shadow: 
     0 2px 6px rgba(0, 0, 0, 0.2),
@@ -559,10 +559,10 @@
 
 .decap-info-tooltip {
   position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  margin-bottom: 8px;
+  top: 50%;
+  right: 100%;
+  transform: translateY(-50%);
+  margin-right: 8px;
   opacity: 0;
   visibility: hidden;
   transition: all 0.2s ease;
@@ -573,29 +573,44 @@
 .decap-info-icon-container:hover .decap-info-tooltip {
   opacity: 1;
   visibility: visible;
-  transform: translateX(-50%) translateY(-4px);
+  transform: translateY(-50%) translateX(-4px);
 }
 
 .decap-info-tooltip-content {
   background: var(--decap-color-text, #333);
   color: var(--decap-color-background, white);
-  padding: 12px 16px;
+  padding: 16px 20px;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  width: 280px;
-  font-size: 14px;
-  line-height: 1.4;
+  width: 320px;
+  font-size: 16px;
+  line-height: 1.5;
   position: relative;
+}
+
+.decap-info-tooltip-content h4 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.decap-info-tooltip-content p {
+  font-size: 16px;
+  margin: 0 0 8px 0;
+}
+
+.decap-info-tooltip-content p:last-child {
+  margin-bottom: 0;
 }
 
 .decap-info-tooltip-content::after {
   content: '';
   position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 50%;
+  left: 100%;
+  transform: translateY(-50%);
   border: 6px solid transparent;
-  border-top-color: var(--decap-color-text, #333);
+  border-left-color: var(--decap-color-text, #333);
 }
 
 .decap-info-tooltip-content h4 {

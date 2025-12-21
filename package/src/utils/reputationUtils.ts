@@ -8,6 +8,7 @@
 
 import { calculateWalletReputation, getTrustLevel, determineCaptchaMode, DEFAULT_CONFIG } from '../lib/customScoring';
 import { ReputationConfig, WalletData } from '../types';
+import { getEtherscanConfig, getReputationConfig, shouldUseMockData, isDebugMode } from './config';
 
 export interface ReputationResult {
   score: number;
@@ -19,12 +20,14 @@ export interface ReputationResult {
 }
 
 export interface ReputationFetchOptions {
-  /** Etherscan API key for real blockchain data */
+  /** Etherscan API key for real blockchain data (overrides config) */
   apiKey?: string;
-  /** Custom scoring configuration */
+  /** Custom scoring configuration (overrides config) */
   config?: ReputationConfig;
-  /** Cache duration in milliseconds (default: 5 minutes) */
+  /** Cache duration in milliseconds (overrides config) */
   cacheDuration?: number;
+  /** Force refresh cache */
+  forceRefresh?: boolean;
 }
 
 // In-memory cache for reputation scores
@@ -57,20 +60,45 @@ export async function fetchWalletReputation(
   walletAddress: string,
   options: ReputationFetchOptions = {}
 ): Promise<ReputationResult> {
+  // Get configuration
+  const etherscanConfig = getEtherscanConfig();
+  const reputationConfig = getReputationConfig();
+  
   const {
-    apiKey,
-    config = DEFAULT_CONFIG,
-    cacheDuration = 300000 // 5 minutes default
+    apiKey = etherscanConfig.apiKey,
+    config = {
+      easyThreshold: reputationConfig.thresholds.simple,
+      bypassThreshold: reputationConfig.thresholds.bypass,
+      weights: {
+        transactionActivity: reputationConfig.weights.transactionActivity,
+        contractInteractions: reputationConfig.weights.contractInteractions,
+        walletAge: reputationConfig.weights.walletAge,
+        tokenDiversity: reputationConfig.weights.tokenDiversity,
+        riskFlags: reputationConfig.weights.riskFlags
+      }
+    },
+    cacheDuration = reputationConfig.cache.ttl,
+    forceRefresh = false
   } = options;
 
-  // Check cache first
+  // Check cache first (unless force refresh)
   const cacheKey = `${walletAddress}_${apiKey ? 'real' : 'fallback'}`;
   const cached = reputationCache.get(cacheKey);
-  if (cached && Date.now() < cached.expiry) {
+  if (!forceRefresh && cached && Date.now() < cached.expiry) {
+    if (isDebugMode()) {
+      console.log('DeCap: Using cached reputation for', walletAddress);
+    }
     return cached.result;
   }
 
   try {
+    if (isDebugMode()) {
+      console.log('DeCap: Fetching reputation for', walletAddress, {
+        useRealData: !shouldUseMockData() && !!apiKey,
+        config
+      });
+    }
+
     // Calculate reputation score
     const score = await calculateWalletReputation(
       walletAddress,
@@ -80,7 +108,7 @@ export async function fetchWalletReputation(
 
     // Get additional analysis
     const trustLevel = getTrustLevel(score);
-    const captchaMode = determineCaptchaMode(score);
+    const captchaMode = determineCaptchaMode(score, config);
 
     // Get wallet data for detailed analysis
     const walletData = await getWalletDataForAddress(walletAddress, apiKey);
@@ -90,7 +118,7 @@ export async function fetchWalletReputation(
       trustLevel,
       captchaMode,
       walletData,
-      dataSource: apiKey ? 'etherscan' : 'fallback',
+      dataSource: (apiKey && !shouldUseMockData()) ? 'etherscan' : 'mock',
       timestamp: Date.now()
     };
 
