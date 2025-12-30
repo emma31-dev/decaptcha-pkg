@@ -186,7 +186,7 @@ updateConfig({
 
 Check out our repository to get started:
 
-**[🚀 Contribute to DeCap SDK](https://github.com/your-org/decap-sdk)**
+**[🚀 Contribute to DeCap SDK](https://github.com/emma31-dev/decaptcha-pkg)**
 
 - Report bugs and request features
 - Submit pull requests

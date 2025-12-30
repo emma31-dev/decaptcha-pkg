@@ -1,6 +1,6 @@
 {
   "name": "decap-sdk",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Decentralized CAPTCHA SDK for Web3 applications",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
