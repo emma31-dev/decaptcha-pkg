@@ -105,6 +105,174 @@ function SmartApp() {
 
 **⚠️ Auto Mode Status:** Currently experimental. Reputation scoring is under active development and may not be fully reliable. Use `simple` or `advanced` modes for production applications.
 
+## Reputation Score Integration
+
+DeCap provides powerful reputation scoring functions that you can use independently in your application for wallet analysis, risk assessment, and custom verification logic.
+
+### Basic Reputation Fetching
+
+```typescript
+import { fetchReputationScore } from 'decap-sdk';
+
+// Simple reputation fetch (uses fallback data if no API key)
+const reputation = await fetchReputationScore('0x742d35Cc6634C0532925a3b8D');
+console.log(reputation.score); // 0-100
+console.log(reputation.trustLevel); // 'low' | 'medium' | 'high'
+console.log(reputation.captchaMode); // 'advanced' | 'simple' | 'bypass'
+
+// Production usage with Etherscan API
+const reputation = await fetchReputationScore('0x742d35Cc6634C0532925a3b8D', {
+  apiKey: process.env.ETHERSCAN_API_KEY
+});
+```
+
+### Advanced Reputation Functions
+
+```typescript
+import { 
+  fetchReputationScore,
+  batchFetchWalletReputation,
+  getCaptchaModeFromScore,
+  getTrustLevelFromScore,
+  calculateWalletReputation,
+  clearCache
+} from 'decap-sdk';
+
+// Batch analyze multiple wallets
+const wallets = ['0x123...', '0x456...', '0x789...'];
+const reputations = await batchFetchWalletReputation(wallets, {
+  apiKey: process.env.ETHERSCAN_API_KEY
+});
+
+// Direct score calculation with custom config
+const score = await calculateWalletReputation('0x123...', {
+  easyThreshold: 50,
+  bypassThreshold: 80,
+  weights: {
+    transactionActivity: 0.3,
+    contractInteractions: 0.25,
+    walletAge: 0.2,
+    tokenDiversity: 0.15,
+    riskFlags: 0.1
+  }
+});
+
+// Utility functions for score analysis
+const trustLevel = getTrustLevelFromScore(75); // 'high'
+const captchaMode = getCaptchaModeFromScore(45); // 'simple'
+
+// Clear reputation cache when needed
+clearCache();
+```
+
+### React Hook Integration
+
+```typescript
+import { useWalletReputation } from 'decap-sdk';
+
+function WalletAnalyzer({ walletAddress }: { walletAddress: string }) {
+  const {
+    reputationData,
+    isLoading,
+    error,
+    getRecommendedMode,
+    fetchReputation,
+    refreshReputation
+  } = useWalletReputation({
+    walletAddress,
+    bypassThreshold: 70,
+    easyThreshold: 40,
+    autoFetch: true
+  });
+
+  if (isLoading) return <div>Analyzing wallet...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!reputationData) return <div>No data</div>;
+
+  return (
+    <div>
+      <h3>Wallet Reputation: {reputationData.score}/100</h3>
+      <p>Trust Level: {reputationData.trustLevel}</p>
+      <p>Recommended CAPTCHA: {getRecommendedMode() || 'None needed'}</p>
+      <button onClick={refreshReputation}>Refresh</button>
+    </div>
+  );
+}
+```
+
+### State Management Integration
+
+```typescript
+// With Zustand
+import { create } from 'zustand';
+import { fetchReputationScore, ReputationResult } from 'decap-sdk';
+
+interface ReputationStore {
+  reputations: Record<string, ReputationResult>;
+  fetchReputation: (address: string) => Promise<void>;
+}
+
+const useReputationStore = create<ReputationStore>((set, get) => ({
+  reputations: {},
+  fetchReputation: async (address: string) => {
+    const reputation = await fetchReputationScore(address, {
+      apiKey: process.env.ETHERSCAN_API_KEY
+    });
+    set(state => ({
+      reputations: { ...state.reputations, [address]: reputation }
+    }));
+  }
+}));
+
+// With Jotai
+import { atom } from 'jotai';
+import { fetchReputationScore } from 'decap-sdk';
+
+const walletAddressAtom = atom<string>('');
+const reputationAtom = atom(async (get) => {
+  const address = get(walletAddressAtom);
+  if (!address) return null;
+  return await fetchReputationScore(address);
+});
+```
+
+### Custom Scoring Configuration
+
+```typescript
+import { calculateWalletReputation, ReputationConfig } from 'decap-sdk';
+
+const customConfig: ReputationConfig = {
+  easyThreshold: 50,    // Simple CAPTCHA threshold
+  bypassThreshold: 80,  // Skip CAPTCHA threshold
+  weights: {
+    transactionActivity: 0.35,     // Transaction count & volume
+    contractInteractions: 0.25,    // Smart contract usage
+    walletAge: 0.20,              // Account age
+    tokenDiversity: 0.15,         // Token variety
+    riskFlags: 0.05               // Risk indicators
+  }
+};
+
+const score = await calculateWalletReputation(
+  '0x742d35Cc6634C0532925a3b8D',
+  customConfig,
+  process.env.ETHERSCAN_API_KEY
+);
+```
+
+### Reputation Result Interface
+
+```typescript
+interface ReputationResult {
+  score: number;                              // 0-100 reputation score
+  trustLevel: 'low' | 'medium' | 'high';    // Trust classification
+  captchaMode: 'advanced' | 'simple' | 'bypass'; // Recommended CAPTCHA
+  walletData: WalletData;                    // Detailed wallet analysis
+  dataSource: 'etherscan' | 'mock' | 'fallback'; // Data source used
+  timestamp: number;                         // When calculated
+}
+```
+
 ## Configuration
 
 ### Setup Configuration File
